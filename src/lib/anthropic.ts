@@ -2,11 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 
 /**
  * Initialize Anthropic Claude API client
+ * Note: API key validation happens at runtime in generateAIResponse()
  */
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.warn('ANTHROPIC_API_KEY not set in environment variables');
-}
-
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });

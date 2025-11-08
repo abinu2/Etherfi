@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# go
+operator/etherfi-avs-operator
+aggregator/etherfi-avs-aggregator
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib

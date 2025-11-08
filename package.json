@@ -16,7 +16,8 @@
     "react-dom": "^18.3.1",
     "next": "^14.2.0",
     "@anthropic-ai/sdk": "^0.32.1",
-    "ethers": "^6.13.4"
+    "ethers": "^6.13.4",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "typescript": "^5.7.2",
