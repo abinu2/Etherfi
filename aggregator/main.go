@@ -39,6 +39,14 @@ func NewAggregator() (*Aggregator, error) {
 	// Load environment variables
 	godotenv.Load("../.env.local")
 
+	// Validate required environment variables
+	requiredEnvVars := []string{"SEPOLIA_RPC_URL", "AGGREGATOR_PRIVATE_KEY", "AVS_CONTRACT_ADDRESS"}
+	for _, envVar := range requiredEnvVars {
+		if os.Getenv(envVar) == "" {
+			return nil, fmt.Errorf("required environment variable %s is not set", envVar)
+		}
+	}
+
 	// Connect to Ethereum
 	client, err := ethclient.Dial(os.Getenv("SEPOLIA_RPC_URL"))
 	if err != nil {

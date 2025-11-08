@@ -86,6 +86,14 @@ func NewOperator() (*Operator, error) {
 	// Load environment variables
 	godotenv.Load("../.env.local")
 
+	// Validate required environment variables
+	requiredEnvVars := []string{"SEPOLIA_RPC_URL", "OPERATOR_PRIVATE_KEY", "AVS_CONTRACT_ADDRESS", "ANTHROPIC_API_KEY"}
+	for _, envVar := range requiredEnvVars {
+		if os.Getenv(envVar) == "" {
+			return nil, fmt.Errorf("required environment variable %s is not set", envVar)
+		}
+	}
+
 	// Connect to Ethereum
 	client, err := ethclient.Dial(os.Getenv("SEPOLIA_RPC_URL"))
 	if err != nil {
@@ -192,7 +200,7 @@ Be concise and practical.`, taskID.String())
 
 	reqBody := ClaudeRequest{
 		Model:     "claude-sonnet-4-20250514",
-		MaxTokens: 1024,
+		MaxTokens: 2048,
 		Messages: []Message{
 			{Role: "user", Content: prompt},
 		},

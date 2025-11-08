@@ -3,6 +3,10 @@ import Anthropic from '@anthropic-ai/sdk';
 /**
  * Initialize Anthropic Claude API client
  */
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('ANTHROPIC_API_KEY not set in environment variables');
+}
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
@@ -16,9 +20,13 @@ export async function generateAIResponse(
   prompt: string,
   systemPrompt?: string
 ): Promise<string> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not configured');
+  }
+
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt || 'You are an expert DeFi advisor specializing in EtherFi liquid staking and gas optimization strategies.',
       messages: [

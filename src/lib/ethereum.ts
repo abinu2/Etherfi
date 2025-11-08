@@ -101,10 +101,25 @@ export async function estimateGas(
 }
 
 /**
- * Get ETH to USD price (placeholder - integrate with price oracle)
+ * Get ETH to USD price from CoinGecko API
+ * Falls back to approximate value if API fails
  */
 export async function getETHPrice(): Promise<number> {
-  // TODO: Integrate with Chainlink or other price oracle
-  // For now, returning a placeholder value
-  return 3000; // $3000 per ETH
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+      { next: { revalidate: 60 } } // Cache for 60 seconds
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch ETH price');
+    }
+
+    const data = await response.json();
+    return data.ethereum?.usd || 3000;
+  } catch (error) {
+    console.warn('Failed to fetch ETH price from CoinGecko, using fallback:', error);
+    // Fallback to approximate value if API fails
+    return 3000;
+  }
 }
