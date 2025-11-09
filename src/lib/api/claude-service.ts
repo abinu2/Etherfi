@@ -22,7 +22,7 @@ class ResponseCache {
 
   set(prompt: string, response: string, tokens: number): void {
     if (this.cache.size >= 100) {
-      const oldest = [...this.cache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+      const oldest = Array.from(this.cache.entries()).sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
       this.cache.delete(oldest[0]);
     }
     this.cache.set(this.hash(prompt), { response, timestamp: Date.now(), tokens });

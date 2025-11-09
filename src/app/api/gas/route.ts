@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentGasPrice } from '@/lib/ethereum';
 import { APIResponse, GasData } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get current gas price

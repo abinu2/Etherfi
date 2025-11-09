@@ -8,8 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const address = searchParams.get('address');
+    const address = request.nextUrl.searchParams.get('address');
 
     if (!address) {
       return NextResponse.json<APIResponse<null>>({
@@ -45,7 +44,7 @@ export async function GET(request: NextRequest) {
       currentAPY: ETHERFI_APY.BASE,
       estimatedAPY: ETHERFI_APY.BASE,
       stakedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago (example)
-      lastUpdated: data.lastUpdated
+      lastUpdated: new Date(data.lastUpdated)
     };
 
     return NextResponse.json<APIResponse<UserPortfolio>>({

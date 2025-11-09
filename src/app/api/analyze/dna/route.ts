@@ -4,6 +4,9 @@ import { yieldArchitectAI } from '@/lib/ai/claude-core';
 import { strategyGenomeAnalyzer } from '@/lib/ai/strategy-genome';
 import type { Strategy, UserProfile, MarketConditions } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 /**
  * Rate Limiter Configuration
  * Unique feature: Complexity-based rate limiting

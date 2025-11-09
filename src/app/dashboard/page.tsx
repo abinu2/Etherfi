@@ -3,20 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import WalletConnect from '@/components/WalletConnect';
-import ValidationTaskSubmitter from '@/components/ValidationTaskSubmitter';
 import ValidationResults from '@/components/ValidationResults';
 import GasMonitor from '@/components/GasMonitor';
 import NetworkStatus from '@/components/NetworkStatus';
-import GasPriceChart from '@/components/GasPriceChart';
-import PortfolioCard from '@/components/PortfolioCard';
-import OperatorGrid from '@/components/OperatorGrid';
+import EnhancedPortfolioCard from '@/components/EnhancedPortfolioCard';
+import WalletHoldings from '@/components/WalletHoldings';
+import InteractiveAVSDashboard from '@/components/InteractiveAVSDashboard';
+import EtherFiStakingDashboard from '@/components/EtherFiStakingDashboard';
+import EtherFiDepositInterface from '@/components/EtherFiDepositInterface';
+import EtherFiLendingProtocol from '@/components/EtherFiLendingProtocol';
 import OperatorMonitor from '@/components/OperatorMonitor';
 import StrategySimulator from '@/components/StrategySimulator';
 import PortfolioAnalytics from '@/components/PortfolioAnalytics';
+import AIStrategyAnalytics from '@/components/AIStrategyAnalytics';
 import AIAssistant from '@/components/AIAssistant';
 import MobileNav from '@/components/MobileNav';
 import DeFiStrategyBuilder from '@/components/DeFiStrategyBuilder';
-import OperatorStaking from '@/components/OperatorStaking';
 
 export default function Dashboard() {
   const [connectedAddress, setConnectedAddress] = useState<string>('');
@@ -41,7 +43,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <MobileNav connectedAddress={connectedAddress} />
               <div className="hidden md:flex items-center gap-4">
-                <NetworkStatus showGasPrice={true} />
+                <NetworkStatus showGasPrice={true} showEthPrice={true} />
                 <WalletConnect onConnect={setConnectedAddress} />
               </div>
             </div>
@@ -83,27 +85,38 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Portfolio Overview */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-3">
-                <PortfolioCard address={connectedAddress} />
-              </div>
-            </div>
-
-            {/* Portfolio Analytics */}
-            <PortfolioAnalytics />
-
-            {/* Core AVS Features - Operator Staking */}
+            {/* Portfolio Overview - Enhanced */}
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <OperatorStaking />
+                <EnhancedPortfolioCard address={connectedAddress} />
               </div>
               <div>
                 <GasMonitor />
               </div>
             </div>
 
-            {/* Main Dashboard Grid */}
+            {/* Wallet Holdings */}
+            <WalletHoldings address={connectedAddress} />
+
+            {/* Interactive AVS Yield Optimizer */}
+            <InteractiveAVSDashboard />
+
+            {/* AI-Powered Strategy Analytics */}
+            <AIStrategyAnalytics />
+
+            {/* EtherFi Fixed-Rate Lending Protocol */}
+            <EtherFiLendingProtocol />
+
+            {/* EtherFi Deposit & Staking Interface */}
+            <EtherFiDepositInterface />
+
+            {/* EtherFi Staking Dashboard */}
+            <EtherFiStakingDashboard walletAddress={connectedAddress} />
+
+            {/* Portfolio Analytics */}
+            <PortfolioAnalytics />
+
+            {/* Strategy Tools Grid */}
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Left Column - Strategy Builder & Simulator */}
               <div className="space-y-6">
@@ -117,12 +130,6 @@ export default function Dashboard() {
                 <OperatorMonitor />
               </div>
             </div>
-
-            {/* Gas Price Analysis */}
-            <GasPriceChart />
-
-            {/* Operator Grid */}
-            <OperatorGrid maxOperators={6} />
 
             {/* Lumina Features Card */}
             <div className="handcrafted-card rounded-3xl p-8 soft-glow accent-line">
