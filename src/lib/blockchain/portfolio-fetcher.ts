@@ -1,5 +1,4 @@
-import { createPublicClient, http, formatEther } from 'viem';
-import { mainnet } from 'viem/chains';
+import { ethers } from 'ethers';
 
 const CONTRACTS = {
   eETH: '0x35fA164735182de50811E8e2E824cFb9B6118ac2',
@@ -8,14 +7,8 @@ const CONTRACTS = {
 } as const;
 
 const ERC20_ABI = [
-  {
-    inputs: [{ name: 'account', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function'
-  }
-] as const;
+  'function balanceOf(address account) view returns (uint256)'
+];
 
 export interface PortfolioData {
   walletAddress: string;
@@ -27,34 +20,32 @@ export interface PortfolioData {
 }
 
 export class PortfolioFetcher {
-  private client = createPublicClient({
-    chain: mainnet,
-    transport: http(process.env.NEXT_PUBLIC_RPC_MAIN || process.env.NEXT_PUBLIC_RPC_URL || 'https://eth.llamarpc.com')
-  });
+  private provider: ethers.JsonRpcProvider;
+
+  constructor() {
+    const rpcUrl = process.env.NEXT_PUBLIC_RPC_MAIN
+      || process.env.NEXT_PUBLIC_RPC_URL
+      || 'https://eth.llamarpc.com';
+    this.provider = new ethers.JsonRpcProvider(rpcUrl);
+  }
 
   async fetch(address: string): Promise<PortfolioData> {
     try {
+      // Create contract instances
+      const eethContract = new ethers.Contract(CONTRACTS.eETH, ERC20_ABI, this.provider);
+      const weethContract = new ethers.Contract(CONTRACTS.weETH, ERC20_ABI, this.provider);
+
       // Parallel fetch all balances
       const [ethBal, eethBal, weethBal, ethPrice] = await Promise.all([
-        this.client.getBalance({ address: address as `0x${string}` }),
-        this.client.readContract({
-          address: CONTRACTS.eETH,
-          abi: ERC20_ABI,
-          functionName: 'balanceOf',
-          args: [address as `0x${string}`]
-        }),
-        this.client.readContract({
-          address: CONTRACTS.weETH,
-          abi: ERC20_ABI,
-          functionName: 'balanceOf',
-          args: [address as `0x${string}`]
-        }),
+        this.provider.getBalance(address),
+        eethContract.balanceOf(address),
+        weethContract.balanceOf(address),
         this.getETHPrice()
       ]);
 
-      const eth = parseFloat(formatEther(ethBal));
-      const eeth = parseFloat(formatEther(eethBal as bigint));
-      const weeth = parseFloat(formatEther(weethBal as bigint));
+      const eth = parseFloat(ethers.formatEther(ethBal));
+      const eeth = parseFloat(ethers.formatEther(eethBal));
+      const weeth = parseFloat(ethers.formatEther(weethBal));
       const totalETH = eth + eeth + weeth;
 
       return {

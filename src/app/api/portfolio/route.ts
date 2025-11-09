@@ -29,12 +29,18 @@ export async function GET(request: NextRequest) {
     // Fetch real portfolio data from blockchain
     const data = await portfolioFetcher.fetch(address);
 
+    // Calculate eETH balance in USD
+    const totalTokens = parseFloat(data.ethBalance) + parseFloat(data.eethBalance) + parseFloat(data.weethBalance);
+    const eethBalanceUSD = totalTokens > 0
+      ? parseFloat(data.eethBalance) * (data.totalValueUSD / totalTokens)
+      : 0;
+
     const portfolio: UserPortfolio = {
       address,
       eethBalance: data.eethBalance,
       weethBalance: data.weethBalance,
       ethBalance: data.ethBalance,
-      eethBalanceUSD: parseFloat(data.eethBalance) * (data.totalValueUSD / (parseFloat(data.ethBalance) + parseFloat(data.eethBalance) + parseFloat(data.weethBalance))),
+      eethBalanceUSD,
       totalStakedUSD: data.totalValueUSD,
       currentAPY: ETHERFI_APY.BASE,
       estimatedAPY: ETHERFI_APY.BASE,

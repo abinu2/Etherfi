@@ -78,14 +78,24 @@ export class StrategyOrchestrator {
 
   private calculateCurrentAllocation(portfolio: any): any {
     const total = portfolio.totalValueUSD;
-    const eeth = parseFloat(portfolio.eethBalance);
-    const weeth = parseFloat(portfolio.weethBalance);
-    const eth = parseFloat(portfolio.ethBalance);
+    const eeth = parseFloat(portfolio.eethBalance) || 0;
+    const weeth = parseFloat(portfolio.weethBalance) || 0;
+    const eth = parseFloat(portfolio.ethBalance) || 0;
+    const totalTokens = eeth + weeth + eth;
+
+    // Handle empty portfolio
+    if (totalTokens === 0) {
+      return {
+        eigenLayer: 0,
+        vaults: 0,
+        reserves: 0
+      };
+    }
 
     return {
-      eigenLayer: ((eeth * 0.5) / (eeth + weeth + eth)) * 100, // Assume 50% restaked
-      vaults: ((eeth * 0.3) / (eeth + weeth + eth)) * 100,     // Assume 30% in vaults
-      reserves: (eth / (eeth + weeth + eth)) * 100
+      eigenLayer: ((eeth * 0.5) / totalTokens) * 100, // Assume 50% restaked
+      vaults: ((eeth * 0.3) / totalTokens) * 100,     // Assume 30% in vaults
+      reserves: (eth / totalTokens) * 100
     };
   }
 
