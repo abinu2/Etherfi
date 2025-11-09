@@ -38,35 +38,35 @@ export default function Home() {
             </div>
 
             <h1 className="text-6xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-              Your DeFi Portfolio
-              <br />
               <span className="relative inline-block">
-                <span className="hand-underline bg-gradient-to-r from-emerald-600 via-cyan-500 to-violet-600 bg-clip-text text-transparent">
-                  Illuminated
+                <span className="hand-underline bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 bg-clip-text text-transparent">
+                  Trust-Minimized
                 </span>
               </span>
+              <br />
+              DeFi Strategy Validation
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Discover optimal DeFi strategies through our unique <strong>Strategy DNA™</strong> profiling system.
-              Powered by Claude AI and designed for the modern investor.
+              Decentralized operator network validates AI-generated DeFi strategies through <strong>EigenLayer AVS</strong>.
+              On-chain attestations with cryptographic proof and slashing protection.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 href="/dashboard"
-                className="group px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover flex items-center gap-2"
+                className="group px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover flex items-center gap-2"
               >
-                <span>Start Analyzing</span>
+                <span>Launch Validator</span>
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
               <a
-                href="#features"
+                href="#avs-architecture"
                 className="px-8 py-4 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all magnetic-hover border border-gray-200 dark:border-gray-700"
               >
-                Explore Features
+                How AVS Works
               </a>
             </div>
           </div>
@@ -77,10 +77,10 @@ export default function Home() {
               <div className="handcrafted-card rounded-3xl p-8 soft-glow">
                 <div className="grid md:grid-cols-4 gap-6">
                   {[
-                    { icon: '🔐', title: 'EigenLayer AVS', desc: 'Decentralized validation', color: 'blue' },
-                    { icon: '🧬', title: 'Strategy DNA', desc: 'Multi-dimensional analysis', color: 'emerald' },
-                    { icon: '📊', title: 'Portfolio Genome', desc: 'Visual asset mapping', color: 'violet' },
-                    { icon: '⚡', title: 'Gas-Aware', desc: 'Cost-optimized execution', color: 'cyan' }
+                    { icon: '🔐', title: 'Decentralized Operators', desc: 'Independent validator network', color: 'blue' },
+                    { icon: '📝', title: 'On-Chain Proofs', desc: 'Cryptographic attestations', color: 'indigo' },
+                    { icon: '⚖️', title: 'Slashing Protection', desc: 'Economic security', color: 'violet' },
+                    { icon: '🤖', title: 'AI Validation', desc: 'Claude-powered analysis', color: 'purple' }
                   ].map((item, i) => (
                     <div key={i} className="text-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 hover:scale-105 transition-transform magnetic-hover">
                       <div className="text-5xl mb-4 liquid-shape inline-block">{item.icon}</div>
@@ -97,56 +97,50 @@ export default function Home() {
           <div id="features" className="mb-20">
             <div className="text-center mb-12 animate-reveal">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                Unique Features
+                EigenLayer AVS Architecture
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-300">
-                Hand-crafted tools designed for intelligent DeFi investing
+                Decentralized validation infrastructure for trust-minimized DeFi
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 {
-                  title: 'EigenLayer AVS',
-                  description: 'Decentralized validator network providing trust-minimized strategy validation with on-chain attestations',
+                  title: 'Decentralized Operator Network',
+                  description: 'Independent validators run the AVS infrastructure, analyzing strategies without centralized control or single points of failure',
                   icon: '🔐',
                   gradient: 'from-blue-500 to-indigo-500'
                 },
                 {
-                  title: 'Strategy DNA Profiling',
-                  description: 'Unique multi-dimensional scoring system analyzing yield potential, risk resilience, and gas efficiency',
-                  icon: '🧬',
-                  gradient: 'from-emerald-500 to-teal-500'
+                  title: 'On-Chain Attestations',
+                  description: 'Cryptographically signed validations stored permanently on-chain with verifiable proof from staked operators',
+                  icon: '📝',
+                  gradient: 'from-indigo-500 to-violet-500'
                 },
                 {
-                  title: 'Architect Chatbot',
-                  description: 'AI assistant with tiered explanations adapting to your experience level - beginner to advanced',
-                  icon: '🤖',
+                  title: 'Slashing Mechanism',
+                  description: 'Economic security through staked ETH - malicious validators lose their stake, ensuring honest validation',
+                  icon: '⚖️',
                   gradient: 'from-violet-500 to-purple-500'
                 },
                 {
-                  title: 'Compatibility Matrix',
-                  description: 'Intelligent matching between strategies and your risk profile for personalized recommendations',
+                  title: 'Restaking Infrastructure',
+                  description: 'Built on EigenLayer\'s restaking protocol, leveraging Ethereum security for programmable trust',
+                  icon: '🔄',
+                  gradient: 'from-purple-500 to-pink-500'
+                },
+                {
+                  title: 'AI-Powered Validation',
+                  description: 'Claude Sonnet 4 analyzes strategy safety and profitability with advanced reasoning capabilities',
+                  icon: '🤖',
+                  gradient: 'from-emerald-500 to-teal-500'
+                },
+                {
+                  title: 'Multi-Operator Consensus',
+                  description: 'Strategies validated by multiple independent operators, aggregated for high-confidence recommendations',
                   icon: '🎯',
                   gradient: 'from-cyan-500 to-blue-500'
-                },
-                {
-                  title: 'Dynamic Risk Analysis',
-                  description: 'Real-time risk profiling with stress testing across 5 dimensions of market conditions',
-                  icon: '🛡️',
-                  gradient: 'from-orange-500 to-red-500'
-                },
-                {
-                  title: 'Gas Optimization',
-                  description: 'Cost-benefit analysis built into every recommendation with optimal execution timing',
-                  icon: '⚡',
-                  gradient: 'from-yellow-500 to-amber-500'
-                },
-                {
-                  title: 'Portfolio Genome',
-                  description: 'Visual DNA-style representation of your asset allocation and strategy composition',
-                  icon: '📊',
-                  gradient: 'from-pink-500 to-rose-500'
                 }
               ].map((feature, i) => (
                 <div
@@ -168,26 +162,26 @@ export default function Home() {
             </div>
           </div>
 
-          {/* How It Works */}
+          {/* How AVS Works */}
           <div className="mb-20">
             <div className="handcrafted-card rounded-3xl p-12 soft-glow animate-reveal">
               <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-                How Lumina Works
+                How the AVS Works
               </h2>
 
               <div className="grid md:grid-cols-4 gap-8">
                 {[
-                  { step: '01', title: 'Connect', desc: 'Link your wallet to analyze your portfolio', icon: '🔗' },
-                  { step: '02', title: 'Analyze', desc: 'AI generates your Strategy DNA profile', icon: '🧬' },
-                  { step: '03', title: 'Discover', desc: 'Get personalized strategy recommendations', icon: '💡' },
-                  { step: '04', title: 'Execute', desc: 'Implement with gas-optimized timing', icon: '🚀' }
+                  { step: '01', title: 'Submit Strategy', desc: 'User submits DeFi strategy for validation', icon: '📤' },
+                  { step: '02', title: 'Operator Analysis', desc: 'Decentralized operators run Claude AI validation', icon: '🤖' },
+                  { step: '03', title: 'Sign Attestation', desc: 'Operators sign cryptographic proofs on-chain', icon: '✍️' },
+                  { step: '04', title: 'Aggregate Results', desc: 'Multi-operator consensus with confidence scores', icon: '📊' }
                 ].map((item, i) => (
                   <div key={i} className="text-center group">
                     <div className="relative mb-6">
                       <div className="text-6xl mb-2 liquid-shape inline-block group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
-                      <div className="font-handwritten text-5xl text-emerald-500 dark:text-emerald-400 absolute -top-4 -right-4">
+                      <div className="font-handwritten text-5xl text-blue-500 dark:text-blue-400 absolute -top-4 -right-4">
                         {item.step}
                       </div>
                     </div>
@@ -199,8 +193,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* EigenLayer AVS Section */}
-          <div className="mb-20">
+          {/* EigenLayer AVS Architecture Section */}
+          <div id="avs-architecture" className="mb-20">
             <div className="handcrafted-card rounded-3xl p-12 soft-glow accent-line animate-reveal">
               <div className="ml-8">
                 <div className="flex items-center gap-3 mb-6">
@@ -282,19 +276,19 @@ export default function Home() {
           {/* CTA Section */}
           <div className="text-center mb-20 animate-reveal">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-violet-500/20 rounded-3xl blur-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-violet-500/20 rounded-3xl blur-xl"></div>
               <div className="relative handcrafted-card rounded-3xl p-12 soft-glow">
                 <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-                  Ready to illuminate your DeFi journey?
+                  Ready for trust-minimized DeFi validation?
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-                  Join the future of intelligent DeFi strategy analysis with Lumina Finance
+                  Join the decentralized network of validators securing DeFi strategies with EigenLayer AVS
                 </p>
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-bold text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover"
+                  className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 text-white font-bold text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover"
                 >
-                  <span>Launch Dashboard</span>
+                  <span>Launch Validator Dashboard</span>
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
