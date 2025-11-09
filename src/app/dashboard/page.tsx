@@ -8,10 +8,11 @@ import ValidationResults from '@/components/ValidationResults';
 import GasMonitor from '@/components/GasMonitor';
 import NetworkStatus from '@/components/NetworkStatus';
 import GasPriceChart from '@/components/GasPriceChart';
-import PortfolioCard from '@/components/PortfolioCard';
 import EnhancedPortfolioCard from '@/components/EnhancedPortfolioCard';
 import WalletHoldings from '@/components/WalletHoldings';
 import AVSDashboard from '@/components/AVSDashboard';
+import AVSSetupWizard from '@/components/AVSSetupWizard';
+import EtherFiStakingDashboard from '@/components/EtherFiStakingDashboard';
 import OperatorGrid from '@/components/OperatorGrid';
 import OperatorMonitor from '@/components/OperatorMonitor';
 import StrategySimulator from '@/components/StrategySimulator';
@@ -19,7 +20,6 @@ import PortfolioAnalytics from '@/components/PortfolioAnalytics';
 import AIAssistant from '@/components/AIAssistant';
 import MobileNav from '@/components/MobileNav';
 import DeFiStrategyBuilder from '@/components/DeFiStrategyBuilder';
-import OperatorStaking from '@/components/OperatorStaking';
 
 export default function Dashboard() {
   const [connectedAddress, setConnectedAddress] = useState<string>('');
@@ -44,7 +44,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <MobileNav connectedAddress={connectedAddress} />
               <div className="hidden md:flex items-center gap-4">
-                <NetworkStatus showGasPrice={true} />
+                <NetworkStatus showGasPrice={true} showEthPrice={true} />
                 <WalletConnect onConnect={setConnectedAddress} />
               </div>
             </div>
@@ -99,43 +99,17 @@ export default function Dashboard() {
             {/* Wallet Holdings */}
             <WalletHoldings address={connectedAddress} />
 
+            {/* EtherFi Staking Dashboard */}
+            <EtherFiStakingDashboard walletAddress={connectedAddress} />
+
             {/* Portfolio Analytics */}
             <PortfolioAnalytics />
 
             {/* Enhanced AVS Dashboard */}
             <AVSDashboard />
 
-            {/* Core AVS Features - Operator Staking */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <OperatorStaking />
-              </div>
-              <div className="space-y-6">
-                <div className="handcrafted-card rounded-3xl p-6">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                    Quick Stats
-                  </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Network Status</p>
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                        ✓ All Systems Operational
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Active Strategies</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">3</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Earnings</p>
-                      <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
-                        $1,247.82
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Innovative AVS Setup Wizard */}
+            <AVSSetupWizard />
 
             {/* Main Dashboard Grid */}
             <div className="grid lg:grid-cols-2 gap-6">

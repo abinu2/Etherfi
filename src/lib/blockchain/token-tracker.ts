@@ -58,6 +58,22 @@ export const SUPPORTED_TOKENS: TokenInfo[] = [
     coingeckoId: 'ethereum'
   },
   {
+    symbol: 'BTC',
+    name: 'Bitcoin (Wrapped)',
+    address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // WBTC
+    decimals: 8,
+    logo: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
+    coingeckoId: 'bitcoin'
+  },
+  {
+    symbol: 'SOL',
+    name: 'Solana (Wrapped)',
+    address: '0xD31a59c85aE9D8edEFeC411D448f90841571b89c', // Wrapped SOL
+    decimals: 9,
+    logo: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+    coingeckoId: 'solana'
+  },
+  {
     symbol: 'eETH',
     name: 'EtherFi Staked ETH',
     address: '0x35fA164735182de50811E8e2E824cFb9B6118ac2',
@@ -72,6 +88,22 @@ export const SUPPORTED_TOKENS: TokenInfo[] = [
     decimals: 18,
     logo: 'https://assets.coingecko.com/coins/images/33033/small/ether.fi.png',
     coingeckoId: 'wrapped-eeth'
+  },
+  {
+    symbol: 'eBTC',
+    name: 'EtherFi Bitcoin',
+    address: '0x657e8C867D8B37dCC18fA4Caead9C45EB088C642',
+    decimals: 8,
+    logo: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
+    coingeckoId: 'bitcoin'
+  },
+  {
+    symbol: 'eUSD',
+    name: 'EtherFi USD',
+    address: '0x893B8BC1A33C1a4E0268Bd425b1cF16e3800E078',
+    decimals: 18,
+    logo: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
+    coingeckoId: 'usd-coin'
   },
   {
     symbol: 'USDC',
@@ -372,8 +404,12 @@ export class TokenTracker {
   private getFallbackPrice(symbol: string): TokenPrice {
     const fallbackPrices: Record<string, number> = {
       'ETH': 3500,
+      'BTC': 95000,
+      'SOL': 140,
       'eETH': 3500,
       'weETH': 3650,
+      'eBTC': 95000,
+      'eUSD': 1.00,
       'stETH': 3490,
       'rETH': 3520,
       'WETH': 3500,
@@ -383,7 +419,7 @@ export class TokenTracker {
 
     return {
       symbol,
-      price: fallbackPrices[symbol] || 0,
+      price: fallbackPrices[symbol] || 1,
       priceChange24h: (Math.random() - 0.5) * 10,
       priceChange7d: (Math.random() - 0.5) * 20,
       marketCap: 0,
