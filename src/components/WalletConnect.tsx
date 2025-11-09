@@ -21,7 +21,7 @@ export default function WalletConnect({ onConnect }: WalletConnectProps) {
           }
         });
     }
-  }, []);
+  }, [onConnect]);
 
   const handleConnect = async () => {
     setIsConnecting(true);

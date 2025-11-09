@@ -15,7 +15,7 @@ export default function Home() {
             EtherFi Strategy Validator
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-12">
-            AI-powered staking strategy validation using EigenLayer's restaking infrastructure
+            AI-powered staking strategy validation using EigenLayer&apos;s restaking infrastructure
           </p>
 
           {/* Features Grid */}
@@ -40,7 +40,7 @@ export default function Home() {
               <div className="text-4xl mb-4">⚡</div>
               <h3 className="text-xl font-bold mb-2">AVS Architecture</h3>
               <p className="text-gray-600">
-                Built on EigenLayer's AVS framework with decentralized operator network
+                Built on EigenLayer&apos;s AVS framework with decentralized operator network
               </p>
             </div>
           </div>
