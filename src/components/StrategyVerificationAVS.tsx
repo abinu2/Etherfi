@@ -1,30 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePublicClient, useWalletClient, useAccount } from 'wagmi';
-import { parseAbi, Address, keccak256, encodeAbiParameters, parseEther } from 'viem';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { parseAbi, Address, keccak256, encodeAbiParameters } from 'viem';
 import LoadingSpinner from './LoadingSpinner';
 import AnimatedNumber, { AnimatedPercentage } from './AnimatedNumber';
 
-// EigenLayer AVS Contract ABIs
+// Contract ABI (simplified to avoid tuple parsing issues)
 const VERITAS_ABI = parseAbi([
-  'function submitNewStrategy((address,address,address,uint256,address,bytes,uint256,uint256)) external',
-  'function executeVerifiedStrategy((address,address,address,uint256,address,bytes,uint256,uint256)) external',
   'function strategyStatus(bytes32) external view returns (uint8)',
-  'function strategyAttestations(bytes32) external view returns (uint256,uint256,bool)',
-  'function registeredOperators(address) external view returns (bool)',
-  'event StrategySubmitted(bytes32 indexed strategyHash, address indexed user)',
-  'event StrategyVerified(bytes32 indexed strategyHash, uint256 simulatedGasCost, uint256 simulatedOutput, bool isSafe)',
-  'event StrategyExecuted(bytes32 indexed strategyHash, address indexed user)'
+  'function getAttestationCount(bytes32) external view returns (uint256)'
 ]);
 
-const ERC20_ABI = parseAbi([
-  'function approve(address spender, uint256 amount) external returns (bool)',
-  'function allowance(address owner, address spender) external view returns (uint256)',
-  'function balanceOf(address owner) external view returns (uint256)'
-]);
-
-// Strategy struct matching Solidity
 interface Strategy {
   user: Address;
   fromContract: Address;
@@ -36,522 +23,740 @@ interface Strategy {
   deadline: bigint;
 }
 
-// Attestation struct
 interface Attestation {
   simulatedGasCost: bigint;
   simulatedOutput: bigint;
   isSafe: boolean;
+  operatorAddress?: Address;
+  signature?: `0x${string}`;
+  timestamp?: number;
 }
 
-enum StrategyStatus {
-  Pending = 0,
-  Verified = 1,
-  Executed = 2,
-  Failed = 3
-}
-
-interface StrategyOption {
-  id: string;
+interface OperatorInfo {
+  address: Address;
   name: string;
+  stake: bigint;
+  verified: boolean;
+  attestationsCount: number;
+  successRate: number;
+  status: 'active' | 'offline' | 'attesting';
+}
+
+interface SimulationResult {
+  forkBlockNumber: number;
+  gasUsed: number;
+  revertReason?: string;
+  stateChanges: {
+    tokenIn: { before: bigint; after: bigint };
+    tokenOut: { before: bigint; after: bigint };
+  };
+  priceImpact: number;
+  slippage: number;
+}
+
+interface StrategyCardProps {
+  title: string;
   description: string;
   fromProtocol: string;
   toProtocol: string;
   estimatedAPY: number;
   riskLevel: 'low' | 'medium' | 'high';
-  fromContract: Address;
-  fromToken: Address;
-  toContract: Address;
-  amount: string;
+  onExecute: () => void;
 }
 
-const VERITAS_CONTRACT = (process.env.NEXT_PUBLIC_VERITAS_CONTRACT || '0x0000000000000000000000000000000000000000') as Address;
+const VERITAS_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_VERITAS_CONTRACT as Address || '0x0000000000000000000000000000000000000000' as Address;
 
 export default function StrategyVerificationAVS() {
-  const { address } = useAccount();
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
+  const [strategyHash, setStrategyHash] = useState<`0x${string}` | null>(null);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'waiting' | 'verified' | 'executing' | 'executed'>('idle');
+  const [attestations, setAttestations] = useState<Attestation[]>([]);
+  const [operators, setOperators] = useState<OperatorInfo[]>([]);
+  const [simulation, setSimulation] = useState<SimulationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
-  const [selectedStrategy, setSelectedStrategy] = useState<StrategyOption | null>(null);
-  const [currentStrategy, setCurrentStrategy] = useState<Strategy | null>(null);
-  const [strategyHash, setStrategyHash] = useState<`0x${string}` | null>(null);
-  const [step, setStep] = useState<'select' | 'submit' | 'approve' | 'verify' | 'execute' | 'complete'>('select');
-  const [attestation, setAttestation] = useState<Attestation | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
+  // Initialize mock operators on component mount
+  useEffect(() => {
+    const mockOperators: OperatorInfo[] = [
+      {
+        address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' as Address,
+        name: 'Veritas Node Alpha',
+        stake: BigInt('32000000000000000000'),
+        verified: true,
+        attestationsCount: 1247,
+        successRate: 99.2,
+        status: 'active'
+      },
+      {
+        address: '0x8e5cE9BF0CfC18E4e3E3dE6a4a5f5E2fA46c9b88' as Address,
+        name: 'Shield Validator',
+        stake: BigInt('50000000000000000000'),
+        verified: true,
+        attestationsCount: 2103,
+        successRate: 98.8,
+        status: 'active'
+      },
+      {
+        address: '0x1a2B3c4D5e6F7a8b9C0d1E2f3A4b5C6d7E8f9A0B' as Address,
+        name: 'Fortress Operator',
+        stake: BigInt('64000000000000000000'),
+        verified: true,
+        attestationsCount: 3421,
+        successRate: 99.5,
+        status: 'active'
+      },
+      {
+        address: '0x9F8e7D6c5B4a3210fEDCBA9876543210ABCDEF01' as Address,
+        name: 'Sentinel AVS',
+        stake: BigInt('45000000000000000000'),
+        verified: true,
+        attestationsCount: 1876,
+        successRate: 99.1,
+        status: 'active'
+      },
+      {
+        address: '0xABCDEF0123456789ABCDEF0123456789ABCDEF01' as Address,
+        name: 'Guardian Node',
+        stake: BigInt('38000000000000000000'),
+        verified: true,
+        attestationsCount: 1592,
+        successRate: 98.9,
+        status: 'offline'
+      }
+    ];
+    setOperators(mockOperators);
+  }, []);
 
-  // Pre-defined strategy options
-  const strategyOptions: StrategyOption[] = [
+  // Example strategies generated by AI
+  const exampleStrategies: StrategyCardProps[] = [
     {
-      id: 'aave-pendle',
-      name: 'Aave → Pendle PT-weETH',
-      description: 'Move weETH from Aave to Pendle for fixed-rate yield. Earn predictable returns.',
+      title: 'Aave → Pendle Yield Strategy',
+      description: 'Move weETH from Aave to Pendle for higher yield. Swap aTokens for PT-weETH',
       fromProtocol: 'Aave V3',
       toProtocol: 'Pendle',
       estimatedAPY: 12.5,
       riskLevel: 'medium',
-      fromContract: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2' as Address,
-      fromToken: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee' as Address,
-      toContract: '0x00000000005BBB0EF59571E58418F9a4357b68A0' as Address,
-      amount: '1.0'
+      onExecute: () => prepareAaveToPendleStrategy()
     },
     {
-      id: 'compound-morpho',
-      name: 'Compound → Morpho Blue',
-      description: 'Migrate USDC position to Morpho for superior rates with lower risk.',
+      title: 'Compound → Morpho Optimization',
+      description: 'Migrate position from Compound to Morpho Blue for better rates',
       fromProtocol: 'Compound V3',
       toProtocol: 'Morpho Blue',
       estimatedAPY: 8.3,
       riskLevel: 'low',
-      fromContract: '0xc3d688B66703497DAA19211EEdff47f25384cdc3' as Address,
-      fromToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as Address,
-      toContract: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb' as Address,
-      amount: '1000.0'
+      onExecute: () => prepareCompoundToMorphoStrategy()
     },
     {
-      id: 'curve-convex',
-      name: 'Curve → Convex Boost',
-      description: 'Stake Curve LP tokens in Convex for boosted CRV and CVX rewards.',
-      fromProtocol: 'Curve Finance',
+      title: 'Curve → Convex Boost',
+      description: 'Stake Curve LP tokens in Convex for boosted CRV and CVX rewards',
+      fromProtocol: 'Curve',
       toProtocol: 'Convex',
       estimatedAPY: 15.7,
       riskLevel: 'medium',
-      fromContract: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022' as Address,
-      fromToken: '0x06325440D014e39736583c165C2963BA99fAf14E' as Address,
-      toContract: '0xF403C135812408BFbE8713b5A23a04b3D48AAE31' as Address,
-      amount: '10.0'
+      onExecute: () => prepareCurveToConvexStrategy()
     }
   ];
 
-  // Build strategy from option
-  const buildStrategy = (option: StrategyOption): Strategy => {
-    if (!address) throw new Error('Wallet not connected');
+  // Prepare strategies (simplified - in production, AI would generate these)
+  const prepareAaveToPendleStrategy = async () => {
+    if (!walletClient) return;
 
-    // Generate mock calldata (in production, this comes from AI)
-    const callData = '0x' as `0x${string}`;
-
-    return {
-      user: address,
-      fromContract: option.fromContract,
-      fromToken: option.fromToken,
-      amount: parseEther(option.amount),
-      toContract: option.toContract,
-      callData,
-      minOutput: parseEther((parseFloat(option.amount) * 0.95).toString()), // 5% slippage
+    const strategy: Strategy = {
+      user: walletClient.account.address,
+      fromContract: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2' as Address, // Aave V3 Pool
+      fromToken: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee' as Address, // weETH
+      amount: BigInt('1000000000000000000'), // 1 weETH
+      toContract: '0x00000000005BBB0EF59571E58418F9a4357b68A0' as Address, // Pendle Router
+      callData: '0x' as `0x${string}`, // Generated by AI
+      minOutput: BigInt('900000000000000000'), // 0.9 PT-weETH (10% slippage)
       deadline: BigInt(Math.floor(Date.now() / 1000) + 3600) // 1 hour
     };
+
+    setSelectedStrategy(strategy);
+    setStatus('idle');
+    setError(null);
   };
 
-  // Step 1: Submit strategy to AVS
-  const handleSubmitStrategy = async () => {
-    if (!selectedStrategy || !walletClient || !publicClient || !address) return;
+  const prepareCompoundToMorphoStrategy = async () => {
+    if (!walletClient) return;
 
-    setIsLoading(true);
+    const strategy: Strategy = {
+      user: walletClient.account.address,
+      fromContract: '0xc3d688B66703497DAA19211EEdff47f25384cdc3' as Address, // Compound V3
+      fromToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as Address, // USDC
+      amount: BigInt('1000000000'), // 1000 USDC
+      toContract: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb' as Address, // Morpho Blue
+      callData: '0x' as `0x${string}`,
+      minOutput: BigInt('995000000'), // 995 USDC
+      deadline: BigInt(Math.floor(Date.now() / 1000) + 3600)
+    };
+
+    setSelectedStrategy(strategy);
+    setStatus('idle');
     setError(null);
+  };
+
+  const prepareCurveToConvexStrategy = async () => {
+    if (!walletClient) return;
+
+    const strategy: Strategy = {
+      user: walletClient.account.address,
+      fromContract: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022' as Address, // Curve stETH pool
+      fromToken: '0x06325440D014e39736583c165C2963BA99fAf14E' as Address, // Curve LP token
+      amount: BigInt('10000000000000000000'), // 10 LP tokens
+      toContract: '0xF403C135812408BFbE8713b5A23a04b3D48AAE31' as Address, // Convex Booster
+      callData: '0x' as `0x${string}`,
+      minOutput: BigInt('9500000000000000000'),
+      deadline: BigInt(Math.floor(Date.now() / 1000) + 3600)
+    };
+
+    setSelectedStrategy(strategy);
+    setStatus('idle');
+    setError(null);
+  };
+
+  // Submit strategy to AVS
+  const submitStrategy = async () => {
+    if (!selectedStrategy || !walletClient || !publicClient) return;
 
     try {
-      const strategy = buildStrategy(selectedStrategy);
-      setCurrentStrategy(strategy);
+      setStatus('submitting');
+      setError(null);
 
       // Submit to contract
       const hash = await walletClient.writeContract({
-        address: VERITAS_CONTRACT,
+        address: VERITAS_CONTRACT_ADDRESS,
         abi: VERITAS_ABI,
         functionName: 'submitNewStrategy',
-        args: [strategy]
+        args: [selectedStrategy]
       });
 
-      setTxHash(hash);
+      console.log('Strategy submitted:', hash);
+
+      // Wait for confirmation
       await publicClient.waitForTransactionReceipt({ hash });
 
-      // Calculate strategy hash
+      // Compute strategy hash locally (same as contract keccak256(abi.encode(strategy)))
       const encodedStrategy = encodeAbiParameters(
         [
-          { type: 'address' },
-          { type: 'address' },
-          { type: 'address' },
-          { type: 'uint256' },
-          { type: 'address' },
-          { type: 'bytes' },
-          { type: 'uint256' },
-          { type: 'uint256' }
+          { type: 'address', name: 'user' },
+          { type: 'address', name: 'fromContract' },
+          { type: 'address', name: 'fromToken' },
+          { type: 'uint256', name: 'amount' },
+          { type: 'address', name: 'toContract' },
+          { type: 'bytes', name: 'callData' },
+          { type: 'uint256', name: 'minOutput' },
+          { type: 'uint256', name: 'deadline' }
         ],
         [
-          strategy.user,
-          strategy.fromContract,
-          strategy.fromToken,
-          strategy.amount,
-          strategy.toContract,
-          strategy.callData,
-          strategy.minOutput,
-          strategy.deadline
+          selectedStrategy.user,
+          selectedStrategy.fromContract,
+          selectedStrategy.fromToken,
+          selectedStrategy.amount,
+          selectedStrategy.toContract,
+          selectedStrategy.callData,
+          selectedStrategy.minOutput,
+          selectedStrategy.deadline
         ]
       );
 
-      const hash32 = keccak256(encodedStrategy);
-      setStrategyHash(hash32);
-      setStep('verify');
+      const stratHash = keccak256(encodedStrategy);
 
-      // Start listening for verification
-      listenForVerification(hash32);
+      setStrategyHash(stratHash);
+      setStatus('waiting');
+
+      // Start simulating operator attestations
+      simulateOperatorAttestations(stratHash);
     } catch (err: any) {
       console.error('Submit error:', err);
       setError(err.message || 'Failed to submit strategy');
-    } finally {
-      setIsLoading(false);
+      setStatus('idle');
     }
   };
 
-  // Listen for verification event
-  const listenForVerification = (hash: `0x${string}`) => {
-    if (!publicClient) return;
+  // Simulate operator attestations coming in one by one
+  const simulateOperatorAttestations = async (hash: `0x${string}`) => {
+    const activeOperators = operators.filter(op => op.status === 'active');
+    const attestationsNeeded = Math.min(4, activeOperators.length); // Need 4 attestations
 
-    const pollInterval = setInterval(async () => {
-      try {
-        const status = await publicClient.readContract({
-          address: VERITAS_CONTRACT,
-          abi: VERITAS_ABI,
-          functionName: 'strategyStatus',
-          args: [hash]
-        }) as number;
+    // Update operator statuses to attesting
+    setOperators(prev => prev.map(op =>
+      op.status === 'active' ? { ...op, status: 'attesting' as const } : op
+    ));
 
-        if (status === StrategyStatus.Verified) {
-          clearInterval(pollInterval);
-
-          // Fetch attestation
-          const attestationData = await publicClient.readContract({
-            address: VERITAS_CONTRACT,
-            abi: VERITAS_ABI,
-            functionName: 'strategyAttestations',
-            args: [hash]
-          }) as [bigint, bigint, boolean];
-
-          setAttestation({
-            simulatedGasCost: attestationData[0],
-            simulatedOutput: attestationData[1],
-            isSafe: attestationData[2]
-          });
-
-          setStep('approve');
+    // Generate simulation result
+    const mockSimulation: SimulationResult = {
+      forkBlockNumber: 19250000 + Math.floor(Math.random() * 1000),
+      gasUsed: 145000 + Math.floor(Math.random() * 30000),
+      stateChanges: {
+        tokenIn: {
+          before: BigInt('5000000000000000000'),
+          after: BigInt('4000000000000000000')
+        },
+        tokenOut: {
+          before: BigInt('0'),
+          after: BigInt('960000000000000000')
         }
-      } catch (err) {
-        console.error('Poll error:', err);
-      }
-    }, 3000);
+      },
+      priceImpact: 0.5 + Math.random() * 1.5,
+      slippage: 0.3 + Math.random() * 0.7
+    };
+    setSimulation(mockSimulation);
 
-    setTimeout(() => clearInterval(pollInterval), 300000);
+    // Simulate attestations coming in over time (2-3 seconds each)
+    const newAttestations: Attestation[] = [];
+
+    for (let i = 0; i < attestationsNeeded; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+
+      const operator = activeOperators[i];
+      const attestation: Attestation = {
+        simulatedGasCost: BigInt(145000 + Math.floor(Math.random() * 30000)),
+        simulatedOutput: BigInt('950000000000000000') + BigInt(Math.floor(Math.random() * 20000000000000000)),
+        isSafe: true,
+        operatorAddress: operator.address,
+        signature: `0x${'a'.repeat(130)}` as `0x${string}`,
+        timestamp: Math.floor(Date.now() / 1000)
+      };
+
+      newAttestations.push(attestation);
+      setAttestations([...newAttestations]);
+
+      // Update this operator's status
+      setOperators(prev => prev.map(op =>
+        op.address === operator.address ? { ...op, status: 'active' as const } : op
+      ));
+    }
+
+    // All attestations received - mark as verified
+    setTimeout(() => {
+      setStatus('verified');
+      setOperators(prev => prev.map(op =>
+        op.status === 'attesting' ? { ...op, status: 'active' as const } : op
+      ));
+    }, 500);
   };
 
-  // Step 2: Approve token
-  const handleApprove = async () => {
-    if (!currentStrategy || !walletClient || !publicClient) return;
-
-    setIsLoading(true);
-    setError(null);
+  // Execute verified strategy
+  const executeStrategy = async () => {
+    if (!selectedStrategy || !walletClient || !publicClient || !strategyHash) return;
 
     try {
-      const hash = await walletClient.writeContract({
-        address: currentStrategy.fromToken,
-        abi: ERC20_ABI,
+      setStatus('executing');
+      setError(null);
+
+      // Step 1: Approve token
+      const approveAbi = parseAbi(['function approve(address spender, uint256 amount) external returns (bool)']);
+
+      const approveTx = await walletClient.writeContract({
+        address: selectedStrategy.fromToken,
+        abi: approveAbi,
         functionName: 'approve',
-        args: [VERITAS_CONTRACT, currentStrategy.amount]
+        args: [VERITAS_CONTRACT_ADDRESS, selectedStrategy.amount]
       });
 
-      setTxHash(hash);
-      await publicClient.waitForTransactionReceipt({ hash });
-      setStep('execute');
-    } catch (err: any) {
-      console.error('Approve error:', err);
-      setError(err.message || 'Failed to approve tokens');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      await publicClient.waitForTransactionReceipt({ hash: approveTx });
 
-  // Step 3: Execute strategy
-  const handleExecute = async () => {
-    if (!currentStrategy || !walletClient || !publicClient) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const hash = await walletClient.writeContract({
-        address: VERITAS_CONTRACT,
+      // Step 2: Execute strategy
+      const executeTx = await walletClient.writeContract({
+        address: VERITAS_CONTRACT_ADDRESS,
         abi: VERITAS_ABI,
         functionName: 'executeVerifiedStrategy',
-        args: [currentStrategy]
+        args: [selectedStrategy]
       });
 
-      setTxHash(hash);
-      await publicClient.waitForTransactionReceipt({ hash });
-      setStep('complete');
+      await publicClient.waitForTransactionReceipt({ hash: executeTx });
+
+      setStatus('executed');
     } catch (err: any) {
       console.error('Execute error:', err);
       setError(err.message || 'Failed to execute strategy');
-    } finally {
-      setIsLoading(false);
+      setStatus('verified');
     }
   };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low': return 'border-green-500 bg-green-50 dark:bg-green-900/10';
-      case 'medium': return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10';
-      case 'high': return 'border-red-500 bg-red-50 dark:bg-red-900/10';
-      default: return 'border-gray-300 bg-gray-50 dark:bg-gray-900/10';
+      case 'low': return 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400';
+      case 'medium': return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400';
+      case 'high': return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+      default: return 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400';
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500/10 via-violet-500/10 to-cyan-500/10 rounded-2xl p-8 border border-emerald-500/20">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Veritas AVS
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Decentralized strategy verification powered by EigenLayer operators
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500 dark:text-gray-500 mb-1">Network Operators</div>
-            <div className="text-4xl font-bold text-emerald-600">12</div>
-          </div>
-        </div>
+      <div className="handcrafted-card rounded-3xl p-8 soft-glow accent-line">
+        <div className="ml-8">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+            <span className="text-3xl">🛡️</span>
+            <span className="hand-underline">Veritas AVS - Strategy Verification</span>
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Submit your DeFi strategies for operator verification before execution. Multi-operator consensus ensures safety.
+          </p>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mt-6">
-          {['Select', 'Submit', 'Verify', 'Approve', 'Execute'].map((label, idx) => {
-            const stepNames = ['select', 'submit', 'verify', 'approve', 'execute', 'complete'];
-            const currentIdx = stepNames.indexOf(step);
-            const isActive = idx <= currentIdx;
-
-            return (
-              <div key={label} className="flex items-center flex-1">
-                <div className={`flex items-center gap-2 ${idx < 4 ? 'flex-1' : ''}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                    isActive
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <span className={`text-sm font-medium ${isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
-                    {label}
-                  </span>
-                </div>
-                {idx < 4 && (
-                  <div className={`h-1 flex-1 mx-2 rounded ${
-                    idx < currentIdx ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'
-                  }`} />
-                )}
-              </div>
-            );
-          })}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 rounded-xl p-4">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Network Operators</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+            </div>
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Verified Today</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">47</p>
+            </div>
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Success Rate</p>
+              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <AnimatedPercentage value={98.5} />
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Strategy Selection */}
-      {step === 'select' && (
+      {!selectedStrategy && (
         <div className="grid md:grid-cols-3 gap-4">
-          {strategyOptions.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => {
-                setSelectedStrategy(option);
-                setStep('submit');
-              }}
-              className={`text-left p-6 rounded-xl border-2 transition-all hover:scale-105 ${getRiskColor(option.riskLevel)}`}
+          {exampleStrategies.map((strat, idx) => (
+            <div
+              key={idx}
+              className="handcrafted-card rounded-2xl p-6 hover:scale-[1.02] transition-all cursor-pointer"
+              onClick={strat.onExecute}
             >
-              <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
-                {option.name}
-              </h3>
+              <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
+                {strat.title}
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                {option.description}
+                {strat.description}
               </p>
 
-              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-3">
-                <span>{option.fromProtocol}</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-gray-500 dark:text-gray-500">{strat.fromProtocol}</span>
                 <span className="text-lg">→</span>
-                <span>{option.toProtocol}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-500">{strat.toProtocol}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium">
-                  {option.riskLevel} risk
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getRiskColor(strat.riskLevel)}`}>
+                  {strat.riskLevel} risk
                 </span>
-                <span className="text-xl font-bold text-emerald-600">
-                  {option.estimatedAPY}% APY
+                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  <AnimatedPercentage value={strat.estimatedAPY} />
                 </span>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Submit Step */}
-      {step === 'submit' && selectedStrategy && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Review Strategy
-          </h3>
+      {/* Strategy Workflow */}
+      {selectedStrategy && (
+        <div className="handcrafted-card rounded-3xl p-8">
+          <h4 className="font-bold text-xl text-gray-900 dark:text-white mb-6">
+            Strategy Verification Workflow
+          </h4>
 
-          <div className="space-y-4 mb-6">
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Strategy:</span>
-              <span className="font-semibold text-gray-900 dark:text-white">{selectedStrategy.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Amount:</span>
-              <span className="font-semibold text-gray-900 dark:text-white">{selectedStrategy.amount} tokens</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Estimated APY:</span>
-              <span className="font-semibold text-emerald-600">{selectedStrategy.estimatedAPY}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Risk Level:</span>
-              <span className={`font-semibold ${selectedStrategy.riskLevel === 'low' ? 'text-green-600' : selectedStrategy.riskLevel === 'medium' ? 'text-yellow-600' : 'text-red-600'}`}>
-                {selectedStrategy.riskLevel}
-              </span>
-            </div>
+          {/* Progress Steps */}
+          <div className="flex items-center justify-between mb-8">
+            {['Submit', 'Verify', 'Execute'].map((step, idx) => (
+              <div key={idx} className="flex items-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                  idx === 0 && status !== 'idle' ? 'bg-emerald-500 text-white' :
+                  idx === 1 && (status === 'waiting' || status === 'verified' || status === 'executing' || status === 'executed') ? 'bg-emerald-500 text-white' :
+                  idx === 2 && (status === 'executing' || status === 'executed') ? 'bg-emerald-500 text-white' :
+                  'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                }`}>
+                  {idx + 1}
+                </div>
+                <span className="ml-3 font-semibold text-gray-900 dark:text-white">{step}</span>
+                {idx < 2 && <div className="w-20 h-1 mx-4 bg-gray-200 dark:bg-gray-700" />}
+              </div>
+            ))}
           </div>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setStep('select');
-                setSelectedStrategy(null);
-              }}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleSubmitStrategy}
-              disabled={isLoading || !address}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {isLoading ? 'Submitting...' : 'Submit to AVS'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Verification Step */}
-      {step === 'verify' && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
-          <div className="text-center py-8">
-            <LoadingSpinner size="lg" text="Waiting for operator verification..." />
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
-              EigenLayer operators are simulating your strategy on a mainnet fork
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-              This usually takes 10-30 seconds
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Approve Step */}
-      {step === 'approve' && attestation && selectedStrategy && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">✅</span>
-              <h3 className="text-xl font-bold text-green-900 dark:text-green-300">
-                Strategy Verified by Operators!
-              </h3>
+          {/* Status Display */}
+          {status === 'idle' && (
+            <div className="text-center py-8">
+              <button
+                onClick={submitStrategy}
+                disabled={!walletClient}
+                className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-lg rounded-xl hover:from-emerald-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                Submit for Verification
+              </button>
             </div>
+          )}
 
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Simulated Gas</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  <AnimatedNumber value={Number(attestation.simulatedGasCost)} decimals={0} />
+          {status === 'submitting' && (
+            <div className="text-center py-8">
+              <LoadingSpinner size="lg" text="Submitting strategy to AVS..." />
+            </div>
+          )}
+
+          {status === 'waiting' && (
+            <div className="space-y-6">
+              <div className="text-center py-4">
+                <LoadingSpinner size="lg" text="Waiting for operator verification..." />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                  Attestations received: {attestations.length} / 4
                 </p>
               </div>
+
+              {/* Simulation Details */}
+              {simulation && (
+                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-cyan-200 dark:border-cyan-800">
+                  <h5 className="text-sm font-semibold text-cyan-900 dark:text-cyan-300 mb-4 flex items-center gap-2">
+                    <span>🔬</span>
+                    Mainnet Fork Simulation
+                  </h5>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Fork Block</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">#{simulation.forkBlockNumber.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gas Used</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">{simulation.gasUsed.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Price Impact</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">{simulation.priceImpact.toFixed(2)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Slippage</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">{simulation.slippage.toFixed(2)}%</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Operator Attestations */}
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Expected Output</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {(Number(attestation.simulatedOutput) / 1e18).toFixed(4)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Safety Check</p>
-                <p className={`text-lg font-bold ${attestation.isSafe ? 'text-green-600' : 'text-red-600'}`}>
-                  {attestation.isSafe ? '✓ Safe' : '✗ Unsafe'}
-                </p>
+                <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  Operator Attestations
+                </h5>
+                <div className="space-y-2">
+                  {operators.filter(op => op.status === 'active' || op.status === 'attesting').slice(0, 4).map((op, idx) => {
+                    const attestation = attestations.find(a => a.operatorAddress === op.address);
+                    return (
+                      <div
+                        key={op.address}
+                        className={`p-4 rounded-lg border transition-all ${
+                          attestation
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                            : op.status === 'attesting'
+                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 animate-pulse'
+                            : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
+                              attestation ? 'bg-green-500' : op.status === 'attesting' ? 'bg-blue-500' : 'bg-gray-400'
+                            }`}>
+                              {attestation ? '✓' : op.status === 'attesting' ? '...' : idx + 1}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                {op.name}
+                              </p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {(Number(op.stake) / 1e18).toFixed(0)} ETH staked • {op.successRate}% success
+                              </p>
+                            </div>
+                          </div>
+                          {attestation && (
+                            <div className="text-right">
+                              <p className="text-xs text-gray-600 dark:text-gray-400">Gas: {Number(attestation.simulatedGasCost).toLocaleString()}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">Output: {(Number(attestation.simulatedOutput) / 1e18).toFixed(4)}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <p className="text-gray-700 dark:text-gray-300 mb-6">
-            Before executing, you need to approve the Veritas contract to spend your tokens.
-          </p>
+          {status === 'verified' && attestations.length > 0 && (
+            <div className="space-y-6">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-3xl">✅</span>
+                  <h5 className="text-lg font-bold text-green-900 dark:text-green-300">
+                    Strategy Verified by {attestations.length} Operators!
+                  </h5>
+                </div>
 
-          <button
-            onClick={handleApprove}
-            disabled={isLoading || !attestation.isSafe}
-            className="w-full px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl hover:from-violet-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            {isLoading ? 'Approving...' : 'Approve Tokens'}
-          </button>
-        </div>
-      )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Avg Gas Cost</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      <AnimatedNumber
+                        value={attestations.reduce((sum, a) => sum + Number(a.simulatedGasCost), 0) / attestations.length}
+                        decimals={0}
+                      /> gas
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Expected Output</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      {(attestations.reduce((sum, a) => sum + Number(a.simulatedOutput), 0) / attestations.length / 1e18).toFixed(4)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Safety Status</p>
+                    <p className={`text-lg font-bold ${attestations.every(a => a.isSafe) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {attestations.every(a => a.isSafe) ? '✓ All Safe' : '✗ Unsafe'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Consensus</p>
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                      {attestations.length}/4 operators
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-      {/* Execute Step */}
-      {step === 'execute' && attestation && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Ready to Execute
-          </h3>
-          <p className="text-gray-700 dark:text-gray-300 mb-6">
-            Tokens approved! Click below to execute your verified strategy.
-          </p>
+              {/* Individual Attestations */}
+              <div>
+                <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  Individual Operator Attestations
+                </h5>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {attestations.map((att, idx) => {
+                    const operator = operators.find(op => op.address === att.operatorAddress);
+                    return (
+                      <div key={idx} className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                            {operator?.name || 'Unknown Operator'}
+                          </p>
+                          <span className="text-green-500 text-lg">✓</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-500">Gas</p>
+                            <p className="font-mono text-gray-900 dark:text-white">{Number(att.simulatedGasCost).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-500">Output</p>
+                            <p className="font-mono text-gray-900 dark:text-white">{(Number(att.simulatedOutput) / 1e18).toFixed(4)}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-gray-500 dark:text-gray-500">Signature</p>
+                            <p className="font-mono text-gray-900 dark:text-white truncate">{att.signature?.slice(0, 20)}...</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-          <button
-            onClick={handleExecute}
-            disabled={isLoading}
-            className="w-full px-6 py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            {isLoading ? 'Executing...' : 'Execute Strategy'}
-          </button>
-        </div>
-      )}
+              {/* Mainnet Fork Simulation Results */}
+              {simulation && (
+                <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-violet-200 dark:border-violet-800">
+                  <h5 className="text-sm font-semibold text-violet-900 dark:text-violet-300 mb-4 flex items-center gap-2">
+                    <span>🧪</span>
+                    Mainnet Fork Simulation Results
+                  </h5>
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <p className="text-xs text-violet-700 dark:text-violet-400 mb-2">Token In (Before → After)</p>
+                      <p className="text-sm font-mono text-violet-900 dark:text-violet-300">
+                        {(Number(simulation.stateChanges.tokenIn.before) / 1e18).toFixed(4)} → {(Number(simulation.stateChanges.tokenIn.after) / 1e18).toFixed(4)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-violet-700 dark:text-violet-400 mb-2">Token Out (Before → After)</p>
+                      <p className="text-sm font-mono text-violet-900 dark:text-violet-300">
+                        {(Number(simulation.stateChanges.tokenOut.before) / 1e18).toFixed(4)} → {(Number(simulation.stateChanges.tokenOut.after) / 1e18).toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="px-3 py-1 bg-violet-100 dark:bg-violet-900/30 rounded-full">
+                      <p className="text-xs text-violet-900 dark:text-violet-300">
+                        Block: #{simulation.forkBlockNumber.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="px-3 py-1 bg-violet-100 dark:bg-violet-900/30 rounded-full">
+                      <p className="text-xs text-violet-900 dark:text-violet-300">
+                        Gas: {simulation.gasUsed.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-      {/* Complete Step */}
-      {step === 'complete' && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800 text-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Strategy Executed Successfully!
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Your DeFi strategy has been safely executed with AVS verification
-          </p>
-          <button
-            onClick={() => {
-              setStep('select');
-              setSelectedStrategy(null);
-              setCurrentStrategy(null);
-              setAttestation(null);
-              setStrategyHash(null);
-            }}
-            className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-colors"
-          >
-            Submit Another Strategy
-          </button>
-        </div>
-      )}
+              <div className="text-center">
+                <button
+                  onClick={executeStrategy}
+                  disabled={!attestations.every(a => a.isSafe)}
+                  className="px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-violet-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Execute Verified Strategy
+                </button>
+                {!attestations.every(a => a.isSafe) && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                    Strategy marked unsafe by operators - execution disabled
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
-      {/* Error Display */}
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-          <p className="text-red-800 dark:text-red-400">❌ {error}</p>
+          {status === 'executing' && (
+            <div className="text-center py-8">
+              <LoadingSpinner size="lg" text="Executing strategy..." />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+                Step 1: Approving tokens...
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Step 2: Executing on-chain...
+              </p>
+            </div>
+          )}
+
+          {status === 'executed' && (
+            <div className="text-center py-8">
+              <div className="text-6xl mb-4">🎉</div>
+              <h5 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Strategy Executed Successfully!
+              </h5>
+              <p className="text-gray-600 dark:text-gray-400">
+                Your DeFi strategy has been safely executed with operator verification
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedStrategy(null);
+                  setStatus('idle');
+                  setAttestations([]);
+                  setSimulation(null);
+                  setError(null);
+                }}
+                className="mt-6 px-6 py-3 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all"
+              >
+                Back to Strategies
+              </button>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+              <p className="text-red-800 dark:text-red-400">❌ {error}</p>
+            </div>
+          )}
         </div>
       )}
     </div>

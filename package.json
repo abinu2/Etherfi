@@ -9,7 +9,6 @@
     "lint": "next lint",
     "task-generator": "node task-generator/index.js",
     "operator": "cd operator && go run main.go",
-    "operator:ts": "tsx operator/operator-service.ts",
     "aggregator": "cd aggregator && go run main.go"
   },
   "dependencies": {
@@ -24,16 +23,14 @@
     "wagmi": "^2.19.2"
   },
   "devDependencies": {
-    "@types/node": "^22.19.0",
+    "@types/node": "^22.10.1",
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.20",
-    "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.20.6",
     "typescript": "^5.7.2"
   }
 }
