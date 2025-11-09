@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +11,10 @@
 }
 
 :root {
+  /* Fonts */
+  --font-jakarta: 'Plus Jakarta Sans', system-ui, arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
   /* Lumina Finance Custom Color Palette */
   --background: #fafafa;
   --foreground: #1a1a1a;

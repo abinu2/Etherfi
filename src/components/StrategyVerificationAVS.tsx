@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePublicClient, useWalletClient, useAccount } from 'wagmi';
-import { parseAbi, Address, keccak256, encodeAbiParameters, parseEther } from 'viem';
+import { parseAbi, keccak256, encodeAbiParameters, parseEther } from 'viem';
 import LoadingSpinner from './LoadingSpinner';
 import AnimatedNumber, { AnimatedPercentage } from './AnimatedNumber';
 
@@ -26,11 +26,11 @@ const ERC20_ABI = parseAbi([
 
 // Strategy struct matching Solidity
 interface Strategy {
-  user: Address;
-  fromContract: Address;
-  fromToken: Address;
+  user: `0x${string}`;
+  fromContract: `0x${string}`;
+  fromToken: `0x${string}`;
   amount: bigint;
-  toContract: Address;
+  toContract: `0x${string}`;
   callData: `0x${string}`;
   minOutput: bigint;
   deadline: bigint;
@@ -58,13 +58,13 @@ interface StrategyOption {
   toProtocol: string;
   estimatedAPY: number;
   riskLevel: 'low' | 'medium' | 'high';
-  fromContract: Address;
-  fromToken: Address;
-  toContract: Address;
+  fromContract: `0x${string}`;
+  fromToken: `0x${string}`;
+  toContract: `0x${string}`;
   amount: string;
 }
 
-const VERITAS_CONTRACT = (process.env.NEXT_PUBLIC_VERITAS_CONTRACT || '0x0000000000000000000000000000000000000000') as Address;
+const VERITAS_CONTRACT = (process.env.NEXT_PUBLIC_VERITAS_CONTRACT || '0x0000000000000000000000000000000000000000') as `0x${string}`;
 
 export default function StrategyVerificationAVS() {
   const { address } = useAccount();
@@ -90,9 +90,9 @@ export default function StrategyVerificationAVS() {
       toProtocol: 'Pendle',
       estimatedAPY: 12.5,
       riskLevel: 'medium',
-      fromContract: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2' as Address,
-      fromToken: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee' as Address,
-      toContract: '0x00000000005BBB0EF59571E58418F9a4357b68A0' as Address,
+      fromContract: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2' as `0x${string}`,
+      fromToken: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee' as `0x${string}`,
+      toContract: '0x00000000005BBB0EF59571E58418F9a4357b68A0' as `0x${string}`,
       amount: '1.0'
     },
     {
@@ -103,9 +103,9 @@ export default function StrategyVerificationAVS() {
       toProtocol: 'Morpho Blue',
       estimatedAPY: 8.3,
       riskLevel: 'low',
-      fromContract: '0xc3d688B66703497DAA19211EEdff47f25384cdc3' as Address,
-      fromToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as Address,
-      toContract: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb' as Address,
+      fromContract: '0xc3d688B66703497DAA19211EEdff47f25384cdc3' as `0x${string}`,
+      fromToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as `0x${string}`,
+      toContract: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb' as `0x${string}`,
       amount: '1000.0'
     },
     {
@@ -116,9 +116,9 @@ export default function StrategyVerificationAVS() {
       toProtocol: 'Convex',
       estimatedAPY: 15.7,
       riskLevel: 'medium',
-      fromContract: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022' as Address,
-      fromToken: '0x06325440D014e39736583c165C2963BA99fAf14E' as Address,
-      toContract: '0xF403C135812408BFbE8713b5A23a04b3D48AAE31' as Address,
+      fromContract: '0xDC24316b9AE028F1497c275EB9192a3Ea0f67022' as `0x${string}`,
+      fromToken: '0x06325440D014e39736583c165C2963BA99fAf14E' as `0x${string}`,
+      toContract: '0xF403C135812408BFbE8713b5A23a04b3D48AAE31' as `0x${string}`,
       amount: '10.0'
     }
   ];
