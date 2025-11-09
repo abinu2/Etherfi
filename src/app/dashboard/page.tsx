@@ -6,6 +6,15 @@ import WalletConnect from '@/components/WalletConnect';
 import ValidationTaskSubmitter from '@/components/ValidationTaskSubmitter';
 import ValidationResults from '@/components/ValidationResults';
 import GasMonitor from '@/components/GasMonitor';
+import NetworkStatus from '@/components/NetworkStatus';
+import GasPriceChart from '@/components/GasPriceChart';
+import PortfolioCard from '@/components/PortfolioCard';
+import OperatorGrid from '@/components/OperatorGrid';
+import OperatorMonitor from '@/components/OperatorMonitor';
+import StrategySimulator from '@/components/StrategySimulator';
+import PortfolioAnalytics from '@/components/PortfolioAnalytics';
+import AIAssistant from '@/components/AIAssistant';
+import MobileNav from '@/components/MobileNav';
 
 export default function Dashboard() {
   const [connectedAddress, setConnectedAddress] = useState<string>('');
@@ -13,13 +22,19 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold text-gray-900">
+          <div className="flex justify-between items-center gap-4 flex-wrap">
+            <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white">
               EtherFi AVS Validator
             </Link>
-            <WalletConnect onConnect={setConnectedAddress} />
+            <div className="flex items-center gap-4">
+              <MobileNav connectedAddress={connectedAddress} />
+              <div className="hidden md:flex items-center gap-4">
+                <NetworkStatus showGasPrice={true} />
+                <WalletConnect onConnect={setConnectedAddress} />
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -34,30 +49,54 @@ export default function Dashboard() {
             </p>
           </div>
         ) : (
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* Left Column - Submit Task */}
-            <div className="space-y-6">
-              <ValidationTaskSubmitter />
-              <GasMonitor />
+          <div className="space-y-6">
+            {/* Portfolio Overview */}
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <PortfolioCard address={connectedAddress} />
+              </div>
+              <div>
+                <GasMonitor />
+              </div>
             </div>
 
-            {/* Right Column - View Results */}
-            <div className="space-y-6">
-              <ValidationResults />
+            {/* Portfolio Analytics */}
+            <PortfolioAnalytics />
 
-              {/* Info Card */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="font-bold text-blue-900 mb-2">How It Works</h3>
-                <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-                  <li>Submit your strategy for validation</li>
-                  <li>Operators run Claude AI to analyze it</li>
-                  <li>Operators sign attestations on-chain</li>
-                  <li>View validated results with confidence scores</li>
-                </ol>
+            {/* Main Dashboard Grid */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left Column - Submit Task & Simulator */}
+              <div className="space-y-6">
+                <ValidationTaskSubmitter />
+                <StrategySimulator />
+                <GasPriceChart />
               </div>
+
+              {/* Right Column - Results & Monitor */}
+              <div className="space-y-6">
+                <ValidationResults />
+                <OperatorMonitor />
+              </div>
+            </div>
+
+            {/* Operator Grid */}
+            <OperatorGrid maxOperators={6} />
+
+            {/* Info Card */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+              <h3 className="font-bold text-blue-900 dark:text-blue-300 mb-2">How It Works</h3>
+              <ol className="text-sm text-blue-800 dark:text-blue-400 space-y-2 list-decimal list-inside">
+                <li>Submit your strategy for validation</li>
+                <li>Operators run Claude AI to analyze it</li>
+                <li>Operators sign attestations on-chain</li>
+                <li>View validated results with confidence scores</li>
+              </ol>
             </div>
           </div>
         )}
+
+        {/* AI Assistant - Global */}
+        <AIAssistant />
       </main>
 
       {/* Footer */}

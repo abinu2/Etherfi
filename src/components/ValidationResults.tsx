@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { ethers } from 'ethers';
+import LoadingSpinner, { ValidationResultSkeleton } from './LoadingSpinner';
+import { NoTasksFound, NetworkError } from './EmptyState';
+import ConfidenceScoreGauge from './ConfidenceScoreGauge';
 
 const CONTRACT_ABI = [
   "function getValidationResult(uint256) external view returns (tuple(uint256 taskId, bool isValid, uint256 confidenceScore, string[] risks, string alternativeStrategy, address[] operators, bytes aggregatedSignature, uint256 validatedAt))"
@@ -11,14 +14,27 @@ export default function ValidationResults() {
   const [taskId, setTaskId] = useState('');
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchResult = async () => {
     if (!taskId) return;
 
     setIsLoading(true);
+    setError(null);
+    setResult(null);
+
     try {
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('Please install MetaMask to view validation results');
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contractAddress = process.env.NEXT_PUBLIC_AVS_CONTRACT_ADDRESS || '';
+
+      if (!contractAddress) {
+        throw new Error('Contract address not configured');
+      }
+
       const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, provider);
 
       const validationResult = await contract.getValidationResult(taskId);
@@ -32,55 +48,128 @@ export default function ValidationResults() {
         operators: validationResult.operators,
         validatedAt: Number(validationResult.validatedAt)
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching result:', error);
-      alert('No validation result found for this task ID');
+      setError(error.message || 'Failed to fetch validation result. Please check the task ID and try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold mb-4">Check Validation Result</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+        Check Validation Result
+      </h2>
 
       <div className="flex gap-2 mb-6">
         <input
           type="text"
           value={taskId}
-          onChange={(e) => setTaskId(e.target.value)}
+          onChange={(e) => {
+            setTaskId(e.target.value);
+            setError(null);
+          }}
           placeholder="Enter Task ID"
-          className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          disabled={isLoading}
         />
         <button
           onClick={fetchResult}
           disabled={isLoading || !taskId}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
         >
-          {isLoading ? 'Loading...' : 'Check'}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <LoadingSpinner size="sm" color="white" />
+              Checking...
+            </span>
+          ) : (
+            'Check'
+          )}
         </button>
       </div>
 
-      {result && (
-        <div className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-lg">Validation Result</h3>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                result.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-                {result.isValid ? '✅ Valid' : '❌ Not Recommended'}
-              </span>
+      {/* Error State */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <h4 className="font-semibold text-red-800 dark:text-red-400 mb-1">
+                Error
+              </h4>
+              <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
             </div>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="mt-3 text-sm text-red-600 dark:text-red-400 hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-xs text-gray-600">Task ID</p>
-                <p className="font-mono font-semibold">{result.taskId}</p>
+      {/* Loading State */}
+      {isLoading && <ValidationResultSkeleton />}
+
+      {/* No Result Yet */}
+      {!isLoading && !error && !result && taskId && (
+        <NoTasksFound />
+      )}
+
+      {/* Result Display */}
+      {!isLoading && result && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Success Animation */}
+          {result.isValid && (
+            <div className="text-center py-4">
+              <div className="text-6xl animate-bounce">🎉</div>
+              <p className="text-green-600 dark:text-green-400 font-semibold mt-2">
+                Strategy Validated Successfully!
+              </p>
+            </div>
+          )}
+
+          <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+              {/* Confidence Gauge */}
+              <div className="flex-shrink-0">
+                <ConfidenceScoreGauge score={result.confidenceScore} animated={true} />
               </div>
-              <div>
-                <p className="text-xs text-gray-600">Confidence Score</p>
-                <p className="font-semibold text-2xl">{result.confidenceScore}%</p>
+
+              {/* Task Info */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="font-bold text-xl text-gray-900 dark:text-white">
+                    Validation Result
+                  </h3>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    result.isValid
+                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
+                      : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300'
+                  }`}>
+                    {result.isValid ? '✅ Valid' : '❌ Not Recommended'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Task ID</p>
+                    <p className="font-mono font-semibold text-gray-900 dark:text-white">
+                      {result.taskId}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Validated At</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {result.validatedAt > 0
+                        ? new Date(result.validatedAt * 1000).toLocaleString()
+                        : 'Pending'}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

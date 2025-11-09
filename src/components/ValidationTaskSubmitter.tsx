@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import LoadingSpinner from './LoadingSpinner';
+import { handleEthereumError } from '@/lib/ethereum';
 
 const CONTRACT_ABI = [
   "function createValidationTask((string,string,uint256,uint256,uint256),(uint8,string,string,uint256,uint256)) external returns (uint256)",
@@ -21,6 +23,39 @@ export default function ValidationTaskSubmitter() {
   const [convertAmount, setConvertAmount] = useState('2.0');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
+  const [gasEstimate, setGasEstimate] = useState<{gas: bigint; costETH: string; costUSD: string} | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
+
+  useEffect(() => {
+    estimateGas();
+  }, [eethBalance, convertAmount]);
+
+  const estimateGas = async () => {
+    setIsEstimating(true);
+    try {
+      if (typeof window.ethereum === 'undefined') return;
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const feeData = await provider.getFeeData();
+
+      // Estimate gas units (mock for now)
+      const gasUnits = BigInt(150000);
+      const gasPrice = feeData.gasPrice || BigInt(0);
+      const gasCostWei = gasUnits * gasPrice;
+      const gasCostETH = ethers.formatEther(gasCostWei);
+      const gasCostUSD = (parseFloat(gasCostETH) * 2000).toFixed(2);
+
+      setGasEstimate({
+        gas: gasUnits,
+        costETH: parseFloat(gasCostETH).toFixed(6),
+        costUSD: gasCostUSD
+      });
+    } catch (error) {
+      console.error('Gas estimation error:', error);
+    } finally {
+      setIsEstimating(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -78,7 +113,8 @@ export default function ValidationTaskSubmitter() {
       }
     } catch (error: any) {
       console.error('Submission error:', error);
-      alert(`Error: ${error.message}`);
+      const errorMessage = handleEthereumError(error);
+      alert(`Error: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -125,12 +161,39 @@ export default function ValidationTaskSubmitter() {
           </p>
         </div>
 
+        {gasEstimate && (
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-semibold mb-2">Estimated Gas Cost</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Gas Limit</p>
+                <p className="text-sm font-medium">{gasEstimate.gas.toString()}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Cost (ETH)</p>
+                <p className="text-sm font-medium">{gasEstimate.costETH} ETH</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Cost (USD)</p>
+                <p className="text-sm font-medium">${gasEstimate.costUSD}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+          className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
         >
-          {isSubmitting ? 'Submitting to AVS...' : 'Submit for Validation'}
+          {isSubmitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <LoadingSpinner size="sm" color="white" />
+              Submitting to AVS...
+            </span>
+          ) : (
+            'Submit for Validation'
+          )}
         </button>
 
         {taskId && (
