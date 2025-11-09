@@ -30,7 +30,7 @@ export default function DemoModeToggle() {
         </div>
 
         <p className="text-sm mb-3 text-white/90">
-          You're viewing a simulated EigenLayer AVS demo with live animations and mock data.
+          You&apos;re viewing a simulated EigenLayer AVS demo with live animations and mock data.
         </p>
 
         <div className="flex items-center justify-between bg-white/10 rounded-lg p-2">
