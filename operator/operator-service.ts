@@ -210,22 +210,22 @@ export class VeritasOperator {
         account: this.account.address,
         to: strategy.toContract,
         data: strategy.callData,
-        value: 0n,
-      }).catch(() => 200000n); // Fallback estimate
+        value: BigInt(0),
+      }).catch(() => BigInt(200000)); // Fallback estimate
 
       // Mock output based on minOutput (in production, decode actual call result)
-      const simulatedOutput = strategy.minOutput * 101n / 100n; // 1% above minimum
+      const simulatedOutput = strategy.minOutput * BigInt(101) / BigInt(100); // 1% above minimum
 
       return {
         success: true,
-        gasCost: (estimatedGas * 30n).toString(), // Assume 30 gwei
+        gasCost: (estimatedGas * BigInt(30)).toString(), // Assume 30 gwei
         output: simulatedOutput,
       };
     } catch (error: any) {
       return {
         success: false,
         gasCost: '0',
-        output: 0n,
+        output: BigInt(0),
         error: error.message,
       };
     }

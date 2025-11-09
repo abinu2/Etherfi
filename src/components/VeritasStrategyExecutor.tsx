@@ -89,7 +89,7 @@ export default function VeritasStrategyExecutor({ contractAddress }: VeritasStra
     address: contractAddress,
     abi: VERITAS_ABI,
     eventName: 'StrategyVerified',
-    onLogs(logs) {
+    onLogs(logs: any[]) {
       for (const log of logs) {
         if (log.args.strategyHash === strategyHash) {
           setAttestation({
