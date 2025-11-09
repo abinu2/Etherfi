@@ -8,9 +8,10 @@ import GasMonitor from '@/components/GasMonitor';
 import NetworkStatus from '@/components/NetworkStatus';
 import EnhancedPortfolioCard from '@/components/EnhancedPortfolioCard';
 import WalletHoldings from '@/components/WalletHoldings';
-import AVSServicesDashboard from '@/components/AVSServicesDashboard';
+import InteractiveAVSDashboard from '@/components/InteractiveAVSDashboard';
 import EtherFiStakingDashboard from '@/components/EtherFiStakingDashboard';
 import EtherFiDepositInterface from '@/components/EtherFiDepositInterface';
+import EtherFiLendingProtocol from '@/components/EtherFiLendingProtocol';
 import OperatorMonitor from '@/components/OperatorMonitor';
 import StrategySimulator from '@/components/StrategySimulator';
 import PortfolioAnalytics from '@/components/PortfolioAnalytics';
@@ -97,17 +98,20 @@ export default function Dashboard() {
             {/* Wallet Holdings */}
             <WalletHoldings address={connectedAddress} />
 
+            {/* Interactive AVS Yield Optimizer */}
+            <InteractiveAVSDashboard />
+
+            {/* AI-Powered Strategy Analytics */}
+            <AIStrategyAnalytics />
+
+            {/* EtherFi Fixed-Rate Lending Protocol */}
+            <EtherFiLendingProtocol />
+
             {/* EtherFi Deposit & Staking Interface */}
             <EtherFiDepositInterface />
 
             {/* EtherFi Staking Dashboard */}
             <EtherFiStakingDashboard walletAddress={connectedAddress} />
-
-            {/* AI-Powered Strategy Analytics */}
-            <AIStrategyAnalytics />
-
-            {/* AVS Services Ecosystem Dashboard */}
-            <AVSServicesDashboard />
 
             {/* Portfolio Analytics */}
             <PortfolioAnalytics />
