@@ -71,6 +71,8 @@ export default function DeFiStrategyBuilder() {
 
   useEffect(() => {
     estimateGas();
+    // estimateGas is stable and doesn't need to be in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [steps]);
 
   const estimateGas = async () => {

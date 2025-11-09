@@ -54,6 +54,8 @@ export default function AnimatedNumber({
         cancelAnimationFrame(rafRef.current);
       }
     };
+    // displayValue is intentionally not in deps - adding it would cause infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, duration]);
 
   const formattedValue = displayValue.toFixed(decimals);
