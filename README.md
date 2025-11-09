@@ -1,265 +1,608 @@
-# EtherFi Strategy Validator AVS
+# Lumina Finance ✨
 
-**AI-Powered Staking Strategy Validation via EigenLayer**
+> **Illuminate Your DeFi Journey with AI-Powered Strategy Validation**
 
-An Actively Validated Service (AVS) where operators use Claude AI to validate EtherFi staking strategies and attest to their correctness on-chain.
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Claude AI](https://img.shields.io/badge/Claude-Sonnet_4-8b5cf6?style=for-the-badge)](https://www.anthropic.com/)
+[![EigenLayer](https://img.shields.io/badge/EigenLayer-AVS-10b981?style=for-the-badge)](https://www.eigenlayer.xyz/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-## 🎯 What is This?
+Lumina Finance is an intelligent DeFi strategy platform combining cutting-edge AI validation through EigenLayer AVS (Actively Validated Services) with an innovative **Strategy DNA™** profiling system. Built for the modern DeFi investor who demands both security and sophistication.
 
-This is a custom AVS built on EigenLayer that validates whether your proposed eETH/weETH reallocation strategies are optimal. Think of it like a decentralized AI advisory service secured by restaked ETH.
+---
+
+## 🌟 What Makes Lumina Unique
+
+### 🔐 Veritas AVS - AI-Powered Strategy Validation
+Built on EigenLayer's AVS framework, Lumina leverages a decentralized network of operators running **Claude Sonnet 4** to validate DeFi strategies before execution:
+- **Pre-execution Validation**: Submit strategies for AI analysis before risking capital
+- **Decentralized Consensus**: Multiple operators attest to strategy safety
+- **Real-time Risk Assessment**: Identify vulnerabilities, market risks, and gas inefficiencies
+- **Alternative Recommendations**: Get optimized strategy suggestions from AI
+
+### 🧬 Strategy DNA™ Profiling
+Unique multi-dimensional strategy analysis system:
+- **Yield Score** (1-100): Comprehensive return potential analysis
+- **Risk Rating** (A-F): Multi-factor safety assessment
+- **Gas Efficiency Tier** (1-5): Cost optimization metrics
+- **Time Horizon Matching**: Short/Medium/Long term alignment
+- **Compatibility Score**: Personalized user-strategy matching
+
+### 🤖 Architect AI Chatbot
+Intelligent assistant with tiered explanations:
+- **Beginner Mode**: Simple analogies and educational content
+- **Intermediate Mode**: Core mechanics and trade-offs
+- **Advanced Mode**: Technical implementation details and smart contract analysis
+
+### 📊 Portfolio Genome Visualization
+Visual DNA-style representation of your DeFi portfolio for instant comprehension of complex allocations.
+
+---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐
-│   User          │  Submits strategy for validation
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│ Task Generator  │  Creates validation task on-chain
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  AVS Contract   │  Emits NewValidationTask event
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Operators      │  Listen for tasks, validate with Claude AI
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Aggregator     │  Collects operator signatures
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  AVS Contract   │  Verifies signatures, stores result
-└─────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                    Lumina Finance Platform                    │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ┌─────────────┐         ┌──────────────┐                   │
+│  │  Frontend   │────────▶│  Veritas AVS │                   │
+│  │  Next.js 14 │         │  Contract    │                   │
+│  └─────────────┘         └──────┬───────┘                   │
+│                                  │                            │
+│                                  │ StrategySubmitted Event   │
+│                                  │                            │
+│                     ┌────────────▼─────────────┐             │
+│                     │   Operator Network       │             │
+│                     │   (Claude Sonnet 4 AI)   │             │
+│                     └────────────┬─────────────┘             │
+│                                  │                            │
+│                                  │ Signed Attestations       │
+│                                  │                            │
+│                     ┌────────────▼─────────────┐             │
+│                     │   Signature Aggregation  │             │
+│                     └────────────┬─────────────┘             │
+│                                  │                            │
+│                                  ▼                            │
+│                     ┌────────────────────────┐               │
+│                     │  On-chain Verification │               │
+│                     │  & Execution           │               │
+│                     └────────────────────────┘               │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## 📦 Components
-
-### 1. Smart Contracts (`contracts/`)
-- **EtherFiStrategyValidator.sol**: Main AVS contract
-  - Task submission and storage
-  - Operator registration
-  - Validation result verification
-
-### 2. Task Generator (`task-generator/`)
-- Node.js service that submits validation tasks to the AVS contract
-- Fetches portfolio data and proposed strategies
-- Emits on-chain events for operators
-
-### 3. Operator Node (`operator/`)
-- Go service that listens for validation tasks
-- Integrates with Claude Sonnet 4 AI for strategy analysis
-- Signs validation results with operator's private key
-
-### 4. Aggregator (`aggregator/`)
-- Go service that collects operator signatures
-- Combines results and submits to AVS contract
-- Enforces quorum requirements
-
-### 5. Frontend (`src/`)
-- Next.js 14 dashboard for submitting strategies
-- View validation results with confidence scores
-- Real-time gas monitoring
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- Go 1.21+
-- Foundry (for smart contracts)
-- MetaMask or compatible wallet
-- Anthropic API key
-- Ethereum testnet RPC (Sepolia)
+- **Node.js** 18+ and npm
+- **MetaMask** or compatible Web3 wallet
+- **Anthropic API Key** ([Get one here](https://console.anthropic.com/))
+- **Ethereum RPC** - Sepolia testnet for development
+- *Optional*: Go 1.21+ for running operator nodes
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/abinu2/CBC-Hackathon-Etherfi.git
-cd CBC-Hackathon-Etherfi
+# Clone the repository
+git clone https://github.com/abinu2/Etherfi.git
+cd Etherfi
 
-# Install frontend dependencies
+# Install dependencies
 npm install
 
-# Install Go dependencies for operator
-cd operator && go mod download && cd ..
-
-# Install Go dependencies for aggregator
-cd aggregator && go mod download && cd ..
-```
-
-### Configuration
-
-1. **Copy environment file:**
-```bash
+# Set up environment variables
 cp .env.example .env.local
 ```
 
-2. **Configure `.env.local`:**
+### Environment Configuration
+
+Edit `.env.local` with your credentials:
+
 ```env
+# Anthropic AI
 ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Blockchain
+NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR-KEY
 SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR-KEY
-NEXT_PUBLIC_AVS_CONTRACT_ADDRESS=0x... # After deployment
-PRIVATE_KEY=0x...
+
+# Contracts
+NEXT_PUBLIC_VERITAS_CONTRACT=0x... # Veritas AVS contract address
+
+# Operator (if running operator node)
 OPERATOR_PRIVATE_KEY=0x...
-AGGREGATOR_PRIVATE_KEY=0x...
+VERITAS_CONTRACT_ADDRESS=0x...
 ```
 
-### Deploy Smart Contract
+### Run Development Server
+
+```bash
+# Start the Next.js development server
+npm run dev
+
+# Open your browser to http://localhost:3000
+```
+
+### Optional: Run Operator Node
+
+If you want to participate as an AVS operator:
+
+```bash
+# TypeScript operator
+npm run operator:ts
+
+# Or Go operator (requires Go 1.21+)
+npm run operator
+```
+
+---
+
+## 📦 Project Structure
+
+```
+lumina-finance/
+├── src/
+│   ├── app/                      # Next.js 14 App Router
+│   │   ├── page.tsx             # Landing page
+│   │   ├── dashboard/           # Main dashboard
+│   │   ├── demo/                # AVS demo
+│   │   ├── api/                 # API routes
+│   │   │   ├── analyze/         # Strategy DNA analysis
+│   │   │   ├── chat/            # AI chatbot
+│   │   │   ├── gas/             # Gas price monitoring
+│   │   │   ├── market/          # Market data
+│   │   │   └── strategy/        # Strategy generation & validation
+│   │   ├── globals.css          # Global styles with custom properties
+│   │   └── layout.tsx           # Root layout
+│   │
+│   ├── components/              # React components
+│   │   ├── AIStrategyChat.tsx           # AI chatbot interface
+│   │   ├── AnimatedNumber.tsx           # Number animations
+│   │   ├── GasMonitor.tsx               # Real-time gas tracking
+│   │   ├── LiveValidationSimulator.tsx  # AVS validation demo
+│   │   ├── PortfolioGenome.tsx          # Visual portfolio DNA
+│   │   ├── Providers.tsx                # Web3 & React Query providers
+│   │   ├── SimulatedOperatorNetwork.tsx # Operator network visualization
+│   │   ├── StrategyDNACard.tsx          # Strategy DNA display
+│   │   ├── StrategyVerificationAVS.tsx  # AVS strategy submission
+│   │   ├── VeritasStrategyExecutor.tsx  # Verified strategy execution
+│   │   ├── WalletConnect.tsx            # Wallet connection
+│   │   └── WalletHoldings.tsx           # Token holdings display
+│   │
+│   └── lib/                     # Utilities & libraries
+│       ├── blockchain/          # Blockchain utilities
+│       │   └── token-tracker.ts # Token balance tracking
+│       ├── ai/
+│       │   └── yield-architect.ts # AI strategy analysis
+│       ├── simulatedEigenLayer.ts # AVS simulation for demo
+│       └── wagmi.ts             # Wagmi configuration
+│
+├── operator/                    # AVS Operator Node
+│   ├── operator-service.ts      # TypeScript operator implementation
+│   └── main.go                  # Go operator implementation
+│
+├── contracts/                   # Smart Contracts
+│   ├── VeritasServiceManager.sol # Main AVS contract
+│   └── foundry.toml             # Foundry configuration
+│
+├── aggregator/                  # Signature Aggregator (Go)
+│
+├── public/                      # Static assets
+│
+├── package.json                 # Dependencies & scripts
+├── next.config.mjs             # Next.js configuration
+├── tailwind.config.ts          # Tailwind CSS configuration
+├── tsconfig.json               # TypeScript configuration
+└── README.md                   # This file
+```
+
+---
+
+## 🎯 Key Features
+
+### 1. Strategy Validation AVS
+
+Submit DeFi strategies for decentralized AI validation:
+
+```typescript
+// Strategy submission
+const strategy = {
+  user: address,
+  fromContract: aavePoolAddress,
+  fromToken: weETHAddress,
+  amount: parseEther("1.0"),
+  toContract: pendleMarketAddress,
+  callData: encodedCallData,
+  minOutput: parseEther("0.95"),
+  deadline: Date.now() + 3600
+};
+
+// Submit to Veritas AVS
+await veritasContract.submitNewStrategy(strategy);
+```
+
+**Operators analyze with Claude AI:**
+- Gas cost simulation
+- Output prediction
+- Risk assessment
+- Market condition analysis
+- Alternative strategy recommendations
+
+### 2. Strategy DNA™ Analysis
+
+Multi-dimensional strategy profiling:
+
+```typescript
+POST /api/analyze/dna
+
+{
+  "portfolio": {
+    "eethBalance": "10.5",
+    "weethBalance": "5.2",
+    "currentAPY": 3.8,
+    "gasPrice": 25
+  },
+  "strategy": {
+    "action": "Convert 2 eETH to weETH",
+    "amount": "2.0",
+    "protocol": "EtherFi"
+  }
+}
+
+// Response includes DNA profile
+{
+  "dnaProfile": {
+    "yieldScore": 78,
+    "riskRating": "B+",
+    "gasTier": 3,
+    "timeHorizon": "Medium",
+    "compatibilityScore": 85
+  }
+}
+```
+
+### 3. AI Chatbot Assistant
+
+Tiered explanations adapting to user expertise:
+
+```typescript
+POST /api/chat
+
+{
+  "message": "What's the best way to maximize yield on my weETH?",
+  "context": {
+    "portfolio": {...},
+    "expertiseLevel": "intermediate"
+  }
+}
+
+// AI provides contextual, personalized advice
+```
+
+### 4. Gas-Aware Recommendations
+
+Every suggestion optimized for gas costs:
+- Real-time gas monitoring
+- Optimal execution timing
+- Cost-benefit analysis
+- Alternative low-gas strategies
+
+### 5. Portfolio Genome Visualization
+
+Visual representation of asset allocation using DNA-style graphics for intuitive understanding of complex portfolios.
+
+---
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript 5.7
+- **Styling**: Tailwind CSS with custom design system
+- **Web3**: Wagmi 2.x, Viem 2.x
+- **State**: React Query (TanStack Query)
+- **Fonts**: Plus Jakarta Sans, JetBrains Mono
+
+### Backend & APIs
+- **Runtime**: Node.js 18+
+- **AI**: Anthropic Claude Sonnet 4
+- **Blockchain**: Viem, Ethers.js 6.x
+
+### Smart Contracts
+- **Language**: Solidity 0.8.x
+- **Framework**: Foundry
+- **Testing**: Forge
+
+### Operator Nodes
+- **Languages**: TypeScript (tsx), Go 1.21+
+- **AI Integration**: Anthropic SDK
+- **Blockchain**: Viem (TS), go-ethereum (Go)
+
+### Infrastructure
+- **Deployment**: Vercel (recommended)
+- **Network**: Ethereum Sepolia (testnet), Mainnet (production)
+- **AVS Framework**: EigenLayer
+
+---
+
+## 🎨 Design System
+
+Lumina features a hand-crafted, unique design system:
+
+### Color Palette
+```css
+--primary: #10b981    /* Emerald - Growth & Prosperity */
+--secondary: #8b5cf6  /* Violet - Intelligence & Innovation */
+--accent: #06b6d4     /* Cyan - Clarity & Trust */
+--tertiary: #f59e0b   /* Amber - Energy & Optimism */
+```
+
+### Visual Elements
+- **Glassmorphism** effects for depth
+- **Soft glows** and organic shadows
+- **Aurora gradients** for background ambiance
+- **Animated numbers** for dynamic data
+- **Handcrafted borders** and underlines
+- **Responsive** mobile-first design
+
+---
+
+## 📖 API Reference
+
+### Strategy DNA Analysis
+```http
+POST /api/analyze/dna
+Content-Type: application/json
+
+{
+  "portfolio": {
+    "eethBalance": "10.5",
+    "weethBalance": "5.2",
+    "currentAPY": 3.8,
+    "gasPrice": 25
+  },
+  "strategy": {
+    "action": "string",
+    "amount": "string",
+    "protocol": "string"
+  }
+}
+```
+
+### AI Chat
+```http
+POST /api/chat
+Content-Type: application/json
+
+{
+  "message": "string",
+  "context": {
+    "portfolio": {...},
+    "expertiseLevel": "beginner|intermediate|advanced"
+  }
+}
+```
+
+### Gas Monitoring
+```http
+GET /api/gas
+
+Response:
+{
+  "gasPrice": number,
+  "trend": "rising|falling|stable",
+  "recommendation": "string"
+}
+```
+
+### Strategy Generation
+```http
+POST /api/strategy/generate
+Content-Type: application/json
+
+{
+  "portfolio": {...},
+  "riskTolerance": "low|medium|high",
+  "timeHorizon": "short|medium|long"
+}
+```
+
+---
+
+## 🧪 Testing & Development
+
+### Run Linter
+```bash
+npm run lint
+```
+
+### Build for Production
+```bash
+npm run build
+```
+
+### Run Production Build
+```bash
+npm run start
+```
+
+### Type Checking
+```bash
+npx tsc --noEmit
+```
+
+---
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. **Connect Repository**: Link your GitHub repo to Vercel
+2. **Configure Environment Variables**: Add all variables from `.env.local`
+3. **Deploy**: Automatic deployment on push to main branch
+
+```bash
+# Or deploy manually
+vercel deploy --prod
+```
+
+### Environment Variables for Production
+
+Required variables:
+- `ANTHROPIC_API_KEY`
+- `NEXT_PUBLIC_SEPOLIA_RPC_URL` (or mainnet RPC)
+- `NEXT_PUBLIC_VERITAS_CONTRACT`
+- `SEPOLIA_RPC_URL`
+
+### Smart Contract Deployment
 
 ```bash
 cd contracts
 
-# Install Foundry if not installed
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-
-# Compile contract
-forge build
-
 # Deploy to Sepolia
 forge create --rpc-url $SEPOLIA_RPC_URL \
   --private-key $PRIVATE_KEY \
-  EtherFiStrategyValidator \
+  VeritasServiceManager \
   --constructor-args $AGGREGATOR_ADDRESS
 
-# Copy deployed address to .env.local
+# Verify on Etherscan
+forge verify-contract \
+  --chain sepolia \
+  $CONTRACT_ADDRESS \
+  VeritasServiceManager
 ```
-
-### Run the AVS
-
-**Terminal 1 - Frontend:**
-```bash
-npm run dev
-# Open http://localhost:3000
-```
-
-**Terminal 2 - Operator:**
-```bash
-cd operator
-go run main.go
-```
-
-**Terminal 3 - Aggregator:**
-```bash
-cd aggregator
-go run main.go
-```
-
-**Terminal 4 - Task Generator (optional manual testing):**
-```bash
-npm run task-generator
-```
-
-## 📋 Usage Flow
-
-1. **Connect Wallet**: Connect MetaMask to Sepolia testnet
-2. **Submit Strategy**: Enter your portfolio and proposed strategy
-3. **Wait for Validation**: Operators analyze with Claude AI (~30-60 seconds)
-4. **View Results**: See confidence scores, risks, and alternative recommendations
-
-## 🔧 Development
-
-### Project Structure
-```
-etherfi-avs-validator/
-├── contracts/              # Solidity smart contracts
-│   ├── EtherFiStrategyValidator.sol
-│   └── foundry.toml
-├── task-generator/         # Node.js task submission service
-│   └── index.js
-├── operator/               # Go operator node with Claude AI
-│   ├── main.go
-│   └── go.mod
-├── aggregator/             # Go signature aggregator
-│   ├── main.go
-│   └── go.mod
-├── src/                    # Next.js frontend
-│   ├── app/
-│   │   ├── page.tsx
-│   │   └── dashboard/
-│   ├── components/
-│   │   ├── ValidationTaskSubmitter.tsx
-│   │   ├── ValidationResults.tsx
-│   │   ├── WalletConnect.tsx
-│   │   └── GasMonitor.tsx
-│   └── lib/
-├── package.json
-└── README.md
-```
-
-### Tech Stack
-- **Smart Contracts**: Solidity 0.8.19, Foundry
-- **Operator/Aggregator**: Go 1.21, go-ethereum
-- **AI**: Claude Sonnet 4 via Anthropic API
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Blockchain**: Ethereum Sepolia, ethers.js
-
-## 🎯 MVP Features
-
-✅ Task submission from frontend
-✅ Operator listening and Claude AI validation
-✅ Simple signature aggregation
-✅ On-chain result verification
-✅ Confidence scores and risk assessment
-
-## 🚧 Future Enhancements
-
-- [ ] BLS signature aggregation (currently ECDSA)
-- [ ] Full EigenLayer integration
-- [ ] Multiple operator support with quorum
-- [ ] Slashing mechanisms
-- [ ] Mainnet deployment
-- [ ] Historical validation dashboard
-
-## 📊 Sample Validation
-
-**Input:**
-```json
-{
-  "eethBalance": "5.2",
-  "convertAmount": "2.0",
-  "action": "CONVERT_TO_WEETH"
-}
-```
-
-**Output:**
-```json
-{
-  "isValid": true,
-  "confidenceScore": 85,
-  "risks": ["High gas costs", "Market volatility"],
-  "alternativeStrategy": "Wait for gas below 30 gwei"
-}
-```
-
-## 🔒 Security
-
-- Private keys must NEVER be committed
-- Use separate keys for task generator, operator, and aggregator
-- Test on Sepolia before mainnet
-- Audit smart contracts before production
-
-## 📝 License
-
-MIT License
-
-## 🙋 Support
-
-For issues and questions:
-- GitHub Issues: [Create an issue](https://github.com/abinu2/CBC-Hackathon-Etherfi/issues)
-- EigenLayer Docs: [https://docs.eigenlayer.xyz/](https://docs.eigenlayer.xyz/)
-
-## 🎉 Acknowledgments
-
-- EigenLayer AVS Framework
-- Anthropic Claude AI
-- EtherFi Protocol
-- Next.js & Vercel
 
 ---
 
-**Built for CBC Hackathon** 🚀
+## 🔒 Security Considerations
+
+### Best Practices
+- ✅ Never commit private keys or API keys
+- ✅ Use environment variables for all sensitive data
+- ✅ Test thoroughly on Sepolia before mainnet deployment
+- ✅ Audit smart contracts before production
+- ✅ Implement rate limiting on API routes
+- ✅ Validate all user inputs
+- ✅ Use separate wallets for different roles (operator, aggregator, etc.)
+
+### Smart Contract Security
+- Contracts should be audited by professional security firms
+- Implement proper access controls
+- Use OpenZeppelin libraries for standard patterns
+- Test edge cases and failure scenarios
+- Monitor contract activity post-deployment
+
+---
+
+## 📊 Performance Optimizations
+
+### Implemented Optimizations
+- ✅ Next.js Image component for optimized images
+- ✅ Dynamic imports for code splitting
+- ✅ React Query for efficient data caching
+- ✅ CSS-in-JS with Tailwind for minimal bundle size
+- ✅ API route optimization with rate limiting
+- ✅ BigInt constructor for ES2019 compatibility
+- ✅ Font loading via CSS import (no build-time network calls)
+
+---
+
+## 🗺️ Roadmap
+
+### MVP (Current)
+- ✅ Strategy DNA™ profiling system
+- ✅ AI-powered chatbot with tiered explanations
+- ✅ Veritas AVS integration
+- ✅ Real-time gas monitoring
+- ✅ Portfolio genome visualization
+- ✅ Simulated operator network
+
+### Phase 2 (Q1 2025)
+- [ ] Mainnet deployment
+- [ ] Multi-operator AVS network
+- [ ] BLS signature aggregation
+- [ ] Historical strategy performance tracking
+- [ ] Advanced portfolio rebalancing
+- [ ] Mobile app (React Native)
+
+### Phase 3 (Q2 2025)
+- [ ] Multi-chain support (Arbitrum, Optimism, Base)
+- [ ] Yield aggregator integration
+- [ ] Automated strategy execution
+- [ ] Social features (strategy sharing)
+- [ ] DAO governance for operator selection
+- [ ] Slashing mechanisms for operator accountability
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Maintain consistent code style (use ESLint)
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **[EigenLayer](https://www.eigenlayer.xyz/)** - AVS framework and restaking infrastructure
+- **[Anthropic](https://www.anthropic.com/)** - Claude AI for intelligent strategy analysis
+- **[EtherFi](https://www.ether.fi/)** - Liquid staking protocol and inspiration
+- **[Next.js](https://nextjs.org/)** - React framework for production
+- **[Vercel](https://vercel.com/)** - Deployment platform
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[Wagmi](https://wagmi.sh/)** - React Hooks for Ethereum
+
+---
+
+## 📞 Support & Community
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/abinu2/Etherfi/issues)
+- **Documentation**: Additional docs in `/docs` folder
+  - [Veritas AVS Setup](VERITAS_AVS_SETUP.md)
+  - [Demo Setup Instructions](DEMO_SETUP_INSTRUCTIONS.md)
+  - [Hackathon Demo Guide](HACKATHON_DEMO_GUIDE.md)
+  - [Yield Architect Features](YIELD_ARCHITECT_FEATURES.md)
+
+---
+
+## 🎯 Quick Links
+
+- [Live Demo](https://lumina-finance.vercel.app) (coming soon)
+- [Documentation](./docs)
+- [Smart Contracts](./contracts)
+- [API Reference](#-api-reference)
+- [Contributing Guidelines](#-contributing)
+
+---
+
+<div align="center">
+
+**Built with 💜 by the Lumina Finance Team**
+
+*Illuminate Your DeFi Journey* ✨
+
+[Website](#) • [Twitter](#) • [Discord](#) • [GitHub](https://github.com/abinu2/Etherfi)
+
+</div>
