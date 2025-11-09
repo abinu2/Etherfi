@@ -33,7 +33,7 @@ export default function Home() {
             <div className="inline-block mb-6">
               <span className="px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-semibold flex items-center gap-2">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                AI-Powered Strategy Intelligence
+                Powered by EigenLayer AVS & Claude AI
               </span>
             </div>
 
@@ -75,8 +75,9 @@ export default function Home() {
           <div className="mb-20 animate-reveal" style={{animationDelay: '0.2s'}}>
             <div className="relative">
               <div className="handcrafted-card rounded-3xl p-8 soft-glow">
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-4 gap-6">
                   {[
+                    { icon: '🔐', title: 'EigenLayer AVS', desc: 'Decentralized validation', color: 'blue' },
                     { icon: '🧬', title: 'Strategy DNA', desc: 'Multi-dimensional analysis', color: 'emerald' },
                     { icon: '📊', title: 'Portfolio Genome', desc: 'Visual asset mapping', color: 'violet' },
                     { icon: '⚡', title: 'Gas-Aware', desc: 'Cost-optimized execution', color: 'cyan' }
@@ -105,6 +106,12 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
+                {
+                  title: 'EigenLayer AVS',
+                  description: 'Decentralized validator network providing trust-minimized strategy validation with on-chain attestations',
+                  icon: '🔐',
+                  gradient: 'from-blue-500 to-indigo-500'
+                },
                 {
                   title: 'Strategy DNA Profiling',
                   description: 'Unique multi-dimensional scoring system analyzing yield potential, risk resilience, and gas efficiency',
@@ -192,6 +199,86 @@ export default function Home() {
             </div>
           </div>
 
+          {/* EigenLayer AVS Section */}
+          <div className="mb-20">
+            <div className="handcrafted-card rounded-3xl p-12 soft-glow accent-line animate-reveal">
+              <div className="ml-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-3xl soft-glow">
+                    🔐
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                      Secured by EigenLayer AVS
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Decentralized trust for your DeFi strategies
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-bold text-lg mb-3 text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                      <span className="text-2xl">🛡️</span>
+                      Trust-Minimized Validation
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      Decentralized operator network validates AI-generated strategies, ensuring safety without centralized control. Each strategy is analyzed by multiple independent validators.
+                    </p>
+                  </div>
+
+                  <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-bold text-lg mb-3 text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                      <span className="text-2xl">📝</span>
+                      On-Chain Attestations
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      Cryptographically signed validations stored permanently on-chain. Every strategy recommendation comes with verifiable proof from staked operators.
+                    </p>
+                  </div>
+
+                  <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-bold text-lg mb-3 text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                      <span className="text-2xl">⚖️</span>
+                      Slashing Protection
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      Malicious validators lose staked ETH, creating strong economic incentives for honest validation. Your strategies are protected by aligned incentives.
+                    </p>
+                  </div>
+
+                  <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-bold text-lg mb-3 text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                      <span className="text-2xl">🔄</span>
+                      Restaking Security
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      Built on EigenLayer&apos;s restaking infrastructure, leveraging Ethereum&apos;s security for DeFi strategy validation with programmable trust.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-blue-200 dark:border-blue-800">
+                  <p className="text-xs text-blue-700 dark:text-blue-400 text-center flex items-center justify-center gap-2 flex-wrap">
+                    <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 font-medium">
+                      Powered by EigenLayer
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 font-medium">
+                      AVS Architecture
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 font-medium">
+                      Decentralized Operators
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 font-medium">
+                      Cryptographic Proofs
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* CTA Section */}
           <div className="text-center mb-20 animate-reveal">
             <div className="relative">
@@ -229,7 +316,7 @@ export default function Home() {
               </div>
 
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Powered by Claude AI • Built on EtherFi • Strategy DNA™
+                Secured by EigenLayer AVS • Powered by Claude AI • Built on EtherFi
               </p>
 
               <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
