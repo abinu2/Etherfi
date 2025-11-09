@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import AnimatedNumber, { AnimatedPercentage } from './AnimatedNumber';
 
@@ -36,11 +36,7 @@ export default function InteractiveAVSDashboard() {
   const [isCalculating, setIsCalculating] = useState(false);
   const chartRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    calculateOptimalStrategy();
-  }, [investmentAmount, riskTolerance, timeHorizon]);
-
-  const calculateOptimalStrategy = async () => {
+  const calculateOptimalStrategy = useCallback(async () => {
     setIsCalculating(true);
 
     // Simulate AI calculation
@@ -138,7 +134,11 @@ export default function InteractiveAVSDashboard() {
 
     // Draw chart
     drawProjectionChart(monthlyProjections);
-  };
+  }, [investmentAmount, riskTolerance, timeHorizon]);
+
+  useEffect(() => {
+    calculateOptimalStrategy();
+  }, [calculateOptimalStrategy]);
 
   const drawProjectionChart = (data: RewardProjection[]) => {
     if (!chartRef.current) return;

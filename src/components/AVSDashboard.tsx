@@ -42,7 +42,7 @@ export default function AVSDashboard() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [operators]);
 
   if (isLoading || !liveData || !metrics) {
     return (
