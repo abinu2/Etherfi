@@ -16,6 +16,7 @@ import OperatorMonitor from '@/components/OperatorMonitor';
 import StrategySimulator from '@/components/StrategySimulator';
 import PortfolioAnalytics from '@/components/PortfolioAnalytics';
 import AIStrategyAnalytics from '@/components/AIStrategyAnalytics';
+import StrategyVerificationAVS from '@/components/StrategyVerificationAVS';
 import AIAssistant from '@/components/AIAssistant';
 import MobileNav from '@/components/MobileNav';
 import DeFiStrategyBuilder from '@/components/DeFiStrategyBuilder';
@@ -52,9 +53,9 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 relative z-10">
+      <main className="container mx-auto px-4 py-4 relative z-10">
         {!connectedAddress ? (
-          <div className="text-center py-20">
+          <div className="text-center py-12">
             <div className="max-w-2xl mx-auto handcrafted-card rounded-3xl p-12 soft-glow animate-reveal">
               <div className="text-6xl mb-6 liquid-shape inline-block">🔗</div>
               <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Connect Your Wallet</h2>
@@ -84,9 +85,9 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Portfolio Overview - Enhanced */}
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
                 <EnhancedPortfolioCard address={connectedAddress} />
               </div>
@@ -97,6 +98,9 @@ export default function Dashboard() {
 
             {/* Wallet Holdings */}
             <WalletHoldings address={connectedAddress} />
+
+            {/* Veritas AVS - Strategy Verification System */}
+            <StrategyVerificationAVS />
 
             {/* Interactive AVS Yield Optimizer */}
             <InteractiveAVSDashboard />
@@ -117,7 +121,7 @@ export default function Dashboard() {
             <PortfolioAnalytics />
 
             {/* Strategy Tools Grid */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid lg:grid-cols-2 gap-4">
               {/* Left Column - Strategy Builder & Simulator */}
               <div className="space-y-6">
                 <DeFiStrategyBuilder />
