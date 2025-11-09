@@ -3,23 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import WalletConnect from '@/components/WalletConnect';
-import ValidationResults from '@/components/ValidationResults';
 import GasMonitor from '@/components/GasMonitor';
 import NetworkStatus from '@/components/NetworkStatus';
 import EnhancedPortfolioCard from '@/components/EnhancedPortfolioCard';
-import WalletHoldings from '@/components/WalletHoldings';
-import InteractiveAVSDashboard from '@/components/InteractiveAVSDashboard';
-import EtherFiStakingDashboard from '@/components/EtherFiStakingDashboard';
-import EtherFiDepositInterface from '@/components/EtherFiDepositInterface';
-import EtherFiLendingProtocol from '@/components/EtherFiLendingProtocol';
-import OperatorMonitor from '@/components/OperatorMonitor';
-import StrategySimulator from '@/components/StrategySimulator';
 import PortfolioAnalytics from '@/components/PortfolioAnalytics';
 import AIStrategyAnalytics from '@/components/AIStrategyAnalytics';
 import StrategyVerificationAVS from '@/components/StrategyVerificationAVS';
 import AIAssistant from '@/components/AIAssistant';
 import MobileNav from '@/components/MobileNav';
-import DeFiStrategyBuilder from '@/components/DeFiStrategyBuilder';
 
 export default function Dashboard() {
   const [connectedAddress, setConnectedAddress] = useState<string>('');
@@ -53,7 +44,7 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 relative z-10">
+      <main className="container mx-auto px-6 py-8 relative z-10">
         {!connectedAddress ? (
           <div className="text-center py-8">
             <div className="max-w-2xl mx-auto handcrafted-card rounded-3xl p-8 soft-glow animate-reveal">
@@ -85,10 +76,10 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Portfolio Overview - Enhanced */}
-            <div className="grid lg:grid-cols-3 gap-3">
-              <div className="lg:col-span-2">
+          <div className="space-y-6">
+            {/* Portfolio Overview */}
+            <div className="grid lg:grid-cols-4 gap-4">
+              <div className="lg:col-span-3">
                 <EnhancedPortfolioCard address={connectedAddress} />
               </div>
               <div>
@@ -96,105 +87,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Wallet Holdings */}
-            <WalletHoldings address={connectedAddress} />
-
-            {/* Veritas AVS - Strategy Verification System */}
+            {/* Core AVS - Strategy Verification & Execution */}
             <StrategyVerificationAVS />
 
-            {/* Interactive AVS Yield Optimizer */}
-            <InteractiveAVSDashboard />
-
-            {/* AI-Powered Strategy Analytics */}
-            <AIStrategyAnalytics />
-
-            {/* EtherFi Fixed-Rate Lending Protocol */}
-            <EtherFiLendingProtocol />
-
-            {/* EtherFi Deposit & Staking Interface */}
-            <EtherFiDepositInterface />
-
-            {/* EtherFi Staking Dashboard */}
-            <EtherFiStakingDashboard walletAddress={connectedAddress} />
-
-            {/* Portfolio Analytics */}
+            {/* Portfolio Analytics with Predictions */}
             <PortfolioAnalytics />
 
-            {/* Strategy Tools Grid */}
-            <div className="grid lg:grid-cols-2 gap-3">
-              {/* Left Column - Strategy Builder & Simulator */}
-              <div className="space-y-3">
-                <DeFiStrategyBuilder />
-                <StrategySimulator />
-              </div>
-
-              {/* Right Column - Results & Monitor */}
-              <div className="space-y-3">
-                <ValidationResults />
-                <OperatorMonitor />
-              </div>
-            </div>
-
-            {/* Lumina Features Card */}
-            <div className="handcrafted-card rounded-3xl p-6 soft-glow accent-line">
-              <div className="ml-8">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-2xl flex items-center gap-3">
-                  <span className="text-3xl">✨</span>
-                  <span className="hand-underline">How Lumina Works</span>
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    {
-                      title: 'Strategy DNA Analysis',
-                      desc: 'Unique multi-dimensional profiling with yield, risk, and gas efficiency scoring',
-                      icon: '🧬',
-                      color: 'emerald'
-                    },
-                    {
-                      title: 'AI-Powered Chatbot',
-                      desc: 'Intelligent assistant with tiered explanations adapting to your experience',
-                      icon: '🤖',
-                      color: 'violet'
-                    },
-                    {
-                      title: 'Portfolio Genome',
-                      desc: 'Visual DNA-style representation of your asset allocation and composition',
-                      icon: '📊',
-                      color: 'cyan'
-                    },
-                    {
-                      title: 'Gas Optimization',
-                      desc: 'Cost-benefit analysis and optimal execution timing built into every recommendation',
-                      icon: '⚡',
-                      color: 'amber'
-                    }
-                  ].map((feature, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 hover:scale-105 transition-transform magnetic-hover">
-                      <div className="flex items-start gap-3">
-                        <div className="text-3xl liquid-shape">{feature.icon}</div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{feature.title}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{feature.desc}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2 flex-wrap justify-center">
-                    <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium">
-                      Powered by Claude AI
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-medium">
-                      Built on EtherFi
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 font-medium">
-                      Strategy DNA™
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* AI Strategy Recommendations */}
+            <AIStrategyAnalytics />
           </div>
         )}
 
@@ -203,7 +103,7 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-6 py-4 glass-modern dark:glass-modern-dark border-t border-gray-200 dark:border-gray-800 relative z-10">
+      <footer className="mt-12 py-6 glass-modern dark:glass-modern-dark border-t border-gray-200 dark:border-gray-800 relative z-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
