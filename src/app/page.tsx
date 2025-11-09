@@ -14,10 +14,10 @@ export default function Home() {
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 animate-fadeIn" style={{animationDelay: '0.1s'}}>
-            Validate Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">DeFi Strategies</span> with AI
+            Veritas AVS: <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Trust-Minimized</span> DeFi Strategies
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 animate-fadeIn" style={{animationDelay: '0.2s'}}>
-            AI-powered staking strategy validation secured by EigenLayer&apos;s restaking infrastructure
+            Decentralized operator network validates AI-generated strategies • Powered by EigenLayer AVS & Claude AI
           </p>
 
           {/* Features Grid */}
