@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { simulateValidation, generateSimulatedOperators, DEMO_SCENARIOS, type SimulatedOperator } from '@/lib/simulatedEigenLayer';
 
 interface ValidationProgress {
@@ -309,7 +310,7 @@ export default function LiveValidationSimulator() {
                   >
                     {operator ? (
                       <div className="flex items-center gap-2">
-                        <img src={operator.avatar} alt="" className="w-6 h-6 rounded-full" />
+                        <Image src={operator.avatar} alt={operator.name} width={24} height={24} className="w-6 h-6 rounded-full" />
                         <span className="text-xs font-medium truncate">{operator.name}</span>
                       </div>
                     ) : (

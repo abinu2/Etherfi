@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { TokenBalance, tokenTracker } from '@/lib/blockchain/token-tracker';
 import AnimatedNumber, { AnimatedCurrency, AnimatedPercentage } from './AnimatedNumber';
 import LoadingSpinner from './LoadingSpinner';
@@ -108,9 +109,11 @@ export default function WalletHoldings({ address }: WalletHoldingsProps) {
             {/* Token Info */}
             <div className="flex items-center gap-3">
               <div className="relative">
-                <img
+                <Image
                   src={holding.token.logo}
                   alt={holding.token.symbol}
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full ring-2 ring-white dark:ring-gray-800"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = `https://via.placeholder.com/40/6366f1/ffffff?text=${holding.token.symbol.charAt(0)}`;

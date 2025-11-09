@@ -104,7 +104,7 @@ export class VeritasOperator {
     const unwatch = this.publicClient.watchEvent({
       address: this.contractAddress,
       event: parseAbiItem('event StrategySubmitted(bytes32 indexed strategyHash, address indexed user, tuple(address user, address fromContract, address fromToken, uint256 amount, address toContract, bytes callData, uint256 minOutput, uint256 deadline) strategy)'),
-      onLogs: async (logs) => {
+      onLogs: async (logs: any[]) => {
         for (const log of logs) {
           await this.handleNewStrategy(log);
         }
