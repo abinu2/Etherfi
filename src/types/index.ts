@@ -6,9 +6,14 @@
 export interface UserPortfolio {
   address: string;
   eethBalance: string;        // in ETH units (e.g., "1.5")
+  weethBalance: string;       // wrapped eETH balance
+  ethBalance: string;         // ETH balance
   eethBalanceUSD: number;     // in USD
+  totalStakedUSD: number;     // total staked value in USD
   currentAPY: number;         // e.g., 3.8
+  estimatedAPY: number;       // estimated APY
   stakedDate?: Date;
+  lastUpdated: Date;          // last update timestamp
 }
 
 // Gas Data Types

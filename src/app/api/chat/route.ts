@@ -4,6 +4,9 @@ import { generateAIResponse } from '@/lib/anthropic';
 import { architectChatbot } from '@/lib/ai/architect-chatbot';
 import type { APIResponse, ChatMessage, ChatContext, UserProfile } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 /**
  * Rate Limiter for chat messages
  */
