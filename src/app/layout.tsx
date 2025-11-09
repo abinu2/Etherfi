@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-outfit'
+});
 
 export const metadata: Metadata = {
-  title: "EtherFi AI Autopilot",
-  description: "AI-powered portfolio management and gas optimization for EtherFi liquid staking",
+  title: "Lumina Finance - Intelligent DeFi Strategy Platform",
+  description: "AI-powered DeFi strategy platform with unique Strategy DNA profiling, portfolio genome analysis, and intelligent yield optimization",
 };
 
 export default function RootLayout({
@@ -15,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${outfit.className} font-modern antialiased`}>{children}</body>
     </html>
   );
 }

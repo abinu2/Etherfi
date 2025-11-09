@@ -2,105 +2,249 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 mesh-gradient pointer-events-none" />
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Hero Section */}
-          <div className="mb-8 animate-fadeIn">
-            <span className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-sm font-semibold rounded-full mb-4 animate-pulse-glow">
-              EigenLayer AVS
-            </span>
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 animate-fadeIn" style={{animationDelay: '0.1s'}}>
-            Veritas AVS: <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Trust-Minimized</span> DeFi Strategies
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 animate-fadeIn" style={{animationDelay: '0.2s'}}>
-            Decentralized operator network validates AI-generated strategies • Powered by EigenLayer AVS & Claude AI
-          </p>
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 relative overflow-hidden">
+      {/* Organic Background Elements */}
+      <div className="absolute inset-0 organic-mesh pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl blob" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl blob" style={{animationDelay: '2s'}} />
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all hover:-translate-y-2 animate-fadeIn border border-gray-200 dark:border-gray-700" style={{animationDelay: '0.3s'}}>
-              <div className="text-5xl mb-4 animate-float">🤖</div>
-              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Claude AI Validation</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Operators use Claude Sonnet 4 to analyze and validate your staking strategies
-              </p>
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <nav className="flex justify-between items-center mb-16 animate-reveal">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center soft-glow">
+                <span className="text-white font-bold text-xl">L</span>
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-violet-600 bg-clip-text text-transparent">
+                Lumina Finance
+              </span>
             </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all hover:-translate-y-2 animate-fadeIn border border-gray-200 dark:border-gray-700" style={{animationDelay: '0.4s'}}>
-              <div className="text-5xl mb-4 animate-float" style={{animationDelay: '1s'}}>🔐</div>
-              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">On-Chain Attestations</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Cryptographically signed operator validations stored permanently on-chain
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all hover:-translate-y-2 animate-fadeIn border border-gray-200 dark:border-gray-700" style={{animationDelay: '0.5s'}}>
-              <div className="text-5xl mb-4 animate-float" style={{animationDelay: '2s'}}>⚡</div>
-              <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">AVS Architecture</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Built on EigenLayer&apos;s AVS framework with decentralized operator network
-              </p>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fadeIn" style={{animationDelay: '0.6s'}}>
             <Link
               href="/dashboard"
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-2xl transform hover:scale-105"
+              className="px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all soft-glow-hover"
             >
-              Launch Validator →
+              Launch App
             </Link>
-            <a
-              href="#how-it-works"
-              className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold text-lg rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg border border-gray-200 dark:border-gray-700"
-            >
-              How It Works
-            </a>
+          </nav>
+
+          {/* Hero Section */}
+          <div className="text-center mb-20 animate-reveal" style={{animationDelay: '0.1s'}}>
+            <div className="inline-block mb-6">
+              <span className="px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-semibold flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                AI-Powered Strategy Intelligence
+              </span>
+            </div>
+
+            <h1 className="text-6xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Your DeFi Portfolio
+              <br />
+              <span className="relative inline-block">
+                <span className="hand-underline bg-gradient-to-r from-emerald-600 via-cyan-500 to-violet-600 bg-clip-text text-transparent">
+                  Illuminated
+                </span>
+              </span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+              Discover optimal DeFi strategies through our unique <strong>Strategy DNA™</strong> profiling system.
+              Powered by Claude AI and designed for the modern investor.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                href="/dashboard"
+                className="group px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-lg shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover flex items-center gap-2"
+              >
+                <span>Start Analyzing</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              <a
+                href="#features"
+                className="px-8 py-4 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all magnetic-hover border border-gray-200 dark:border-gray-700"
+              >
+                Explore Features
+              </a>
+            </div>
           </div>
 
-          {/* How It Works */}
-          <div id="how-it-works" className="mt-16 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700 animate-fadeIn" style={{animationDelay: '0.7s'}}>
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">How It Works</h2>
-            <div className="grid md:grid-cols-4 gap-6 text-left">
-              <div className="group">
-                <div className="text-blue-600 dark:text-blue-400 font-bold text-3xl mb-2 group-hover:scale-110 transition-transform">1</div>
-                <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">Submit Strategy</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Submit your eETH/weETH strategy for validation</p>
-              </div>
-              <div className="group">
-                <div className="text-blue-600 dark:text-blue-400 font-bold text-3xl mb-2 group-hover:scale-110 transition-transform">2</div>
-                <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">AI Analysis</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Operators analyze with Claude AI</p>
-              </div>
-              <div className="group">
-                <div className="text-blue-600 dark:text-blue-400 font-bold text-3xl mb-2 group-hover:scale-110 transition-transform">3</div>
-                <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">Sign Attestation</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Operators sign validations on-chain</p>
-              </div>
-              <div className="group">
-                <div className="text-blue-600 dark:text-blue-400 font-bold text-3xl mb-2 group-hover:scale-110 transition-transform">4</div>
-                <h3 className="font-semibold mb-1 text-gray-900 dark:text-white">Get Results</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">View validated strategy with confidence scores</p>
+          {/* Visual Showcase */}
+          <div className="mb-20 animate-reveal" style={{animationDelay: '0.2s'}}>
+            <div className="relative">
+              <div className="handcrafted-card rounded-3xl p-8 soft-glow">
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[
+                    { icon: '🧬', title: 'Strategy DNA', desc: 'Multi-dimensional analysis', color: 'emerald' },
+                    { icon: '📊', title: 'Portfolio Genome', desc: 'Visual asset mapping', color: 'violet' },
+                    { icon: '⚡', title: 'Gas-Aware', desc: 'Cost-optimized execution', color: 'cyan' }
+                  ].map((item, i) => (
+                    <div key={i} className="text-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 hover:scale-105 transition-transform magnetic-hover">
+                      <div className="text-5xl mb-4 liquid-shape inline-block">{item.icon}</div>
+                      <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{item.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Tech Stack */}
-          <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700 animate-fadeIn" style={{animationDelay: '0.8s'}}>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Built With</p>
-            <div className="flex flex-wrap justify-center gap-4">
-              {['EigenLayer AVS', 'Claude Sonnet 4', 'EtherFi', 'Solidity', 'Next.js 14', 'Go'].map((tech) => (
-                <span key={tech} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                  {tech}
-                </span>
+          {/* Features Grid */}
+          <div id="features" className="mb-20">
+            <div className="text-center mb-12 animate-reveal">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Unique Features
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300">
+                Hand-crafted tools designed for intelligent DeFi investing
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  title: 'Strategy DNA Profiling',
+                  description: 'Unique multi-dimensional scoring system analyzing yield potential, risk resilience, and gas efficiency',
+                  icon: '🧬',
+                  gradient: 'from-emerald-500 to-teal-500'
+                },
+                {
+                  title: 'Architect Chatbot',
+                  description: 'AI assistant with tiered explanations adapting to your experience level - beginner to advanced',
+                  icon: '🤖',
+                  gradient: 'from-violet-500 to-purple-500'
+                },
+                {
+                  title: 'Compatibility Matrix',
+                  description: 'Intelligent matching between strategies and your risk profile for personalized recommendations',
+                  icon: '🎯',
+                  gradient: 'from-cyan-500 to-blue-500'
+                },
+                {
+                  title: 'Dynamic Risk Analysis',
+                  description: 'Real-time risk profiling with stress testing across 5 dimensions of market conditions',
+                  icon: '🛡️',
+                  gradient: 'from-orange-500 to-red-500'
+                },
+                {
+                  title: 'Gas Optimization',
+                  description: 'Cost-benefit analysis built into every recommendation with optimal execution timing',
+                  icon: '⚡',
+                  gradient: 'from-yellow-500 to-amber-500'
+                },
+                {
+                  title: 'Portfolio Genome',
+                  description: 'Visual DNA-style representation of your asset allocation and strategy composition',
+                  icon: '📊',
+                  gradient: 'from-pink-500 to-rose-500'
+                }
+              ].map((feature, i) => (
+                <div
+                  key={i}
+                  className="handcrafted-card rounded-2xl p-6 soft-glow-hover magnetic-hover animate-reveal"
+                  style={{animationDelay: `${0.1 * i}s`}}
+                >
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 text-2xl soft-glow`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               ))}
             </div>
           </div>
+
+          {/* How It Works */}
+          <div className="mb-20">
+            <div className="handcrafted-card rounded-3xl p-12 soft-glow animate-reveal">
+              <h2 className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+                How Lumina Works
+              </h2>
+
+              <div className="grid md:grid-cols-4 gap-8">
+                {[
+                  { step: '01', title: 'Connect', desc: 'Link your wallet to analyze your portfolio', icon: '🔗' },
+                  { step: '02', title: 'Analyze', desc: 'AI generates your Strategy DNA profile', icon: '🧬' },
+                  { step: '03', title: 'Discover', desc: 'Get personalized strategy recommendations', icon: '💡' },
+                  { step: '04', title: 'Execute', desc: 'Implement with gas-optimized timing', icon: '🚀' }
+                ].map((item, i) => (
+                  <div key={i} className="text-center group">
+                    <div className="relative mb-6">
+                      <div className="text-6xl mb-2 liquid-shape inline-block group-hover:scale-110 transition-transform">
+                        {item.icon}
+                      </div>
+                      <div className="font-handwritten text-5xl text-emerald-500 dark:text-emerald-400 absolute -top-4 -right-4">
+                        {item.step}
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{item.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mb-20 animate-reveal">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-violet-500/20 rounded-3xl blur-xl"></div>
+              <div className="relative handcrafted-card rounded-3xl p-12 soft-glow">
+                <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">
+                  Ready to illuminate your DeFi journey?
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                  Join the future of intelligent DeFi strategy analysis with Lumina Finance
+                </p>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-bold text-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all soft-glow-hover"
+                >
+                  <span>Launch Dashboard</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="pt-12 border-t border-gray-200 dark:border-gray-800">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                  <span className="text-white font-bold">L</span>
+                </div>
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Lumina Finance
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Powered by Claude AI • Built on EtherFi • Strategy DNA™
+              </p>
+
+              <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+                <a href="#" className="hover:text-emerald-500 transition-colors hand-underline">Docs</a>
+                <a href="#" className="hover:text-emerald-500 transition-colors hand-underline">About</a>
+                <a href="#" className="hover:text-emerald-500 transition-colors hand-underline">Support</a>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                © 2025 Lumina Finance. Intelligent DeFi Strategy Platform.
+              </p>
+            </div>
+          </footer>
         </div>
       </div>
     </main>
