@@ -4,10 +4,76 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// EigenLayer imports (install via: npm install @eigenlayer/contracts or use interfaces)
+interface IAVSDirectory {
+    function registerOperatorToAVS(
+        address operator,
+        ISignatureUtils.SignatureWithSaltAndExpiry memory operatorSignature
+    ) external;
+
+    function deregisterOperatorFromAVS(address operator) external;
+}
+
+interface IStrategyManager {
+    function getDeposits(address depositor) external view returns (IStrategy[] memory, uint256[] memory);
+}
+
+interface IStrategy {
+    function underlyingToken() external view returns (IERC20);
+    function userUnderlyingView(address user) external view returns (uint256);
+}
+
+interface ISignatureUtils {
+    struct SignatureWithSaltAndExpiry {
+        bytes signature;
+        bytes32 salt;
+        uint256 expiry;
+    }
+}
+
+// Solady ECDSA library for signature verification
+library ECDSA {
+    /**
+     * @dev Recovers the signer's address from a message hash and signature.
+     */
+    function recover(bytes32 hash, bytes memory signature) internal pure returns (address) {
+        if (signature.length != 65) {
+            return address(0);
+        }
+
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+
+        if (v != 27 && v != 28) {
+            return address(0);
+        }
+
+        return ecrecover(hash, v, r, s);
+    }
+
+    /**
+     * @dev Returns an Ethereum Signed Message hash of the given hash.
+     */
+    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    }
+}
+
 /**
  * @title VeritasServiceManager
  * @notice Core AVS contract for strategy verification and execution
- * @dev Integrates with EigenLayer for operator management
+ * @dev Integrates with EigenLayer for operator management and uses AI-verified DeFi strategies
  */
 contract VeritasServiceManager is Ownable {
 
@@ -48,6 +114,12 @@ contract VeritasServiceManager is Ownable {
 
     // ============ State Variables ============
 
+    /// @notice EigenLayer AVS Directory for operator registration
+    IAVSDirectory public avsDirectory;
+
+    /// @notice EigenLayer Strategy Manager for checking operator stakes
+    IStrategyManager public strategyManager;
+
     /// @notice Minimum number of operators required for consensus
     uint256 public operatorQuorumThreshold;
 
@@ -78,20 +150,45 @@ contract VeritasServiceManager is Ownable {
 
     // ============ Constructor ============
 
-    constructor(uint256 _operatorQuorumThreshold) Ownable(msg.sender) {
+    /**
+     * @notice Initialize the VeritasServiceManager with EigenLayer integration
+     * @param _avsDirectory Address of EigenLayer's AVS Directory
+     * @param _strategyManager Address of EigenLayer's Strategy Manager
+     * @param _operatorQuorumThreshold Minimum operators needed for quorum
+     */
+    constructor(
+        address _avsDirectory,
+        address _strategyManager,
+        uint256 _operatorQuorumThreshold
+    ) Ownable(msg.sender) {
+        require(_avsDirectory != address(0), "Invalid AVS Directory");
+        require(_strategyManager != address(0), "Invalid Strategy Manager");
         require(_operatorQuorumThreshold > 0, "Quorum must be > 0");
+
+        avsDirectory = IAVSDirectory(_avsDirectory);
+        strategyManager = IStrategyManager(_strategyManager);
         operatorQuorumThreshold = _operatorQuorumThreshold;
     }
 
     // ============ Operator Management ============
 
     /**
-     * @notice Register a new operator to the AVS
+     * @notice Register a new operator to the AVS via EigenLayer
      * @param operator Address of the operator to register
+     * @param signature EigenLayer signature from the operator
      */
-    function registerOperatorToAVS(address operator) external onlyOwner {
+    function registerOperatorToAVS(
+        address operator,
+        ISignatureUtils.SignatureWithSaltAndExpiry memory signature
+    ) external {
         require(!registeredOperators[operator], "Already registered");
+
+        // Register operator with EigenLayer's AVS Directory
+        avsDirectory.registerOperatorToAVS(operator, signature);
+
+        // Mark operator as registered in our contract
         registeredOperators[operator] = true;
+
         emit OperatorRegistered(operator);
     }
 
@@ -102,7 +199,13 @@ contract VeritasServiceManager is Ownable {
     function deregisterOperator(address operator) external {
         require(msg.sender == operator || msg.sender == owner(), "Not authorized");
         require(registeredOperators[operator], "Not registered");
+
+        // Deregister from EigenLayer's AVS Directory
+        avsDirectory.deregisterOperatorFromAVS(operator);
+
+        // Remove from our registry
         registeredOperators[operator] = false;
+
         emit OperatorDeregistered(operator);
     }
 
@@ -169,6 +272,54 @@ contract VeritasServiceManager is Ownable {
             strategyStatus[strategyHash] = StrategyStatus.Verified;
             emit StrategyVerified(strategyHash, attestation);
         }
+    }
+
+    /**
+     * @notice Respond to a strategy with multiple operator signatures (alternative to individual attestations)
+     * @param strategy The strategy being verified
+     * @param attestation The consensus attestation data
+     * @param signatures Array of operator signatures
+     */
+    function respondToStrategy(
+        Strategy calldata strategy,
+        Attestation calldata attestation,
+        bytes[] calldata signatures
+    ) external {
+        bytes32 strategyHash = keccak256(abi.encode(strategy));
+        require(strategyStatus[strategyHash] == StrategyStatus.Pending, "Strategy not pending");
+        require(strategy.deadline > block.timestamp, "Strategy expired");
+
+        // Create attestation hash
+        bytes32 attestationHash = keccak256(abi.encode(strategyHash, attestation));
+        bytes32 ethSignedHash = ECDSA.toEthSignedMessageHash(attestationHash);
+
+        // Track unique signers
+        uint256 signerCount = 0;
+        mapping(address => bool) storage hasSigned = operatorAttestations[strategyHash];
+
+        // Verify each signature
+        for (uint256 i = 0; i < signatures.length; i++) {
+            address signer = ECDSA.recover(ethSignedHash, signatures[i]);
+
+            require(signer != address(0), "Invalid signature");
+            require(registeredOperators[signer], "Signer not registered operator");
+            require(!hasSigned[signer], "Duplicate signature");
+
+            hasSigned[signer] = true;
+            signerCount++;
+
+            emit OperatorAttested(strategyHash, signer, attestation);
+        }
+
+        // Check quorum
+        require(signerCount >= operatorQuorumThreshold, "Insufficient signatures for quorum");
+
+        // Store attestation count and mark as verified
+        attestationCount[strategyHash] = signerCount;
+        strategyAttestations[strategyHash] = attestation;
+        strategyStatus[strategyHash] = StrategyStatus.Verified;
+
+        emit StrategyVerified(strategyHash, attestation);
     }
 
     // ============ Strategy Execution ============
