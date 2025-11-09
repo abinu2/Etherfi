@@ -53,10 +53,10 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-4 relative z-10">
+      <main className="container mx-auto px-4 py-6 relative z-10">
         {!connectedAddress ? (
-          <div className="text-center py-12">
-            <div className="max-w-2xl mx-auto handcrafted-card rounded-3xl p-12 soft-glow animate-reveal">
+          <div className="text-center py-8">
+            <div className="max-w-2xl mx-auto handcrafted-card rounded-3xl p-8 soft-glow animate-reveal">
               <div className="text-6xl mb-6 liquid-shape inline-block">🔗</div>
               <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Connect Your Wallet</h2>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
@@ -85,9 +85,9 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Portfolio Overview - Enhanced */}
-            <div className="grid lg:grid-cols-3 gap-4">
+            <div className="grid lg:grid-cols-3 gap-3">
               <div className="lg:col-span-2">
                 <EnhancedPortfolioCard address={connectedAddress} />
               </div>
@@ -121,22 +121,22 @@ export default function Dashboard() {
             <PortfolioAnalytics />
 
             {/* Strategy Tools Grid */}
-            <div className="grid lg:grid-cols-2 gap-4">
+            <div className="grid lg:grid-cols-2 gap-3">
               {/* Left Column - Strategy Builder & Simulator */}
-              <div className="space-y-6">
+              <div className="space-y-3">
                 <DeFiStrategyBuilder />
                 <StrategySimulator />
               </div>
 
               {/* Right Column - Results & Monitor */}
-              <div className="space-y-6">
+              <div className="space-y-3">
                 <ValidationResults />
                 <OperatorMonitor />
               </div>
             </div>
 
             {/* Lumina Features Card */}
-            <div className="handcrafted-card rounded-3xl p-8 soft-glow accent-line">
+            <div className="handcrafted-card rounded-3xl p-6 soft-glow accent-line">
               <div className="ml-8">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-2xl flex items-center gap-3">
                   <span className="text-3xl">✨</span>
@@ -203,7 +203,7 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-12 py-6 glass-modern dark:glass-modern-dark border-t border-gray-200 dark:border-gray-800 relative z-10">
+      <footer className="mt-6 py-4 glass-modern dark:glass-modern-dark border-t border-gray-200 dark:border-gray-800 relative z-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">

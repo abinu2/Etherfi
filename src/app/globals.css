@@ -42,10 +42,8 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  /* Modern, innovative system font stack */
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Plus Jakarta Sans - unique, bold, modern font */
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: 'liga' 1, 'calt' 1, 'kern' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -54,8 +52,7 @@ body {
 
 /* Modern Typography Hierarchy */
 h1, h2, h3, h4, h5, h6 {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.2;
@@ -69,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Monospace for code and technical elements */
 code, pre, .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }
 
