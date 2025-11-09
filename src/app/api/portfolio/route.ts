@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getEETHBalance, getETHPrice } from '@/lib/ethereum';
+import { portfolioFetcher } from '@/lib/blockchain/portfolio-fetcher';
 import { ETHERFI_APY } from '@/lib/constants';
 import { APIResponse, UserPortfolio } from '@/types';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,28 +26,31 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Fetch eETH balance
-    const eethBalance = await getEETHBalance(address);
-    const ethPrice = await getETHPrice();
-    const eethBalanceUSD = parseFloat(eethBalance) * ethPrice;
+    // Fetch real portfolio data from blockchain
+    const data = await portfolioFetcher.fetch(address);
 
     const portfolio: UserPortfolio = {
       address,
-      eethBalance,
-      eethBalanceUSD: Math.round(eethBalanceUSD * 100) / 100,
+      eethBalance: data.eethBalance,
+      weethBalance: data.weethBalance,
+      ethBalance: data.ethBalance,
+      eethBalanceUSD: parseFloat(data.eethBalance) * (data.totalValueUSD / (parseFloat(data.ethBalance) + parseFloat(data.eethBalance) + parseFloat(data.weethBalance))),
+      totalStakedUSD: data.totalValueUSD,
       currentAPY: ETHERFI_APY.BASE,
+      estimatedAPY: ETHERFI_APY.BASE,
       stakedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago (example)
+      lastUpdated: data.lastUpdated
     };
 
     return NextResponse.json<APIResponse<UserPortfolio>>({
       success: true,
       data: portfolio,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Portfolio API error:', error);
     return NextResponse.json<APIResponse<null>>({
       success: false,
-      error: 'Failed to fetch portfolio data',
+      error: error.message || 'Failed to fetch portfolio data',
     }, { status: 500 });
   }
 }
